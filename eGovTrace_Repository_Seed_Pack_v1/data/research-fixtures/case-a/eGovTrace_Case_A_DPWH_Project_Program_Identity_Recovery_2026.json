@@ -1,0 +1,67 @@
+{
+  "case": "A",
+  "project": "Cabarasan to Dao FMR, Gamay, Northern Samar",
+  "execution_date": "2026-09-05",
+  "result": "PARTIAL",
+  "fmr_uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+  "fmr_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+  "budget_php": 12500000,
+  "dbm_uacs_direct_release": "310203206922000",
+  "dbm_uacs_nep": "310203206867000",
+  "dpwh_project_component_candidate": "P00046632VS-CW1",
+  "dpwh_current_aip_uacs": "165004050305802",
+  "dpwh_current_aip_allocation_php": 10000000,
+  "dpwh_project_component_status": "NOT_ESTABLISHED_AS_2021_BRIDGE",
+  "primary_procurement": "NOT_ESTABLISHED",
+  "contract_id": "UNRESOLVED",
+  "award": "UNRESOLVED",
+  "ntp": "UNRESOLVED",
+  "financial_execution": "UNRESOLVED",
+  "false_join_tests": [
+    {
+      "match_basis": "same route/title, different year",
+      "record": "2016 17IJ0004 / reference 4088342",
+      "status": "REJECTED JOIN"
+    },
+    {
+      "match_basis": "same/near-same project description, current DPWH component",
+      "record": "P00046632VS-CW1",
+      "status": "NOT ESTABLISHED"
+    },
+    {
+      "match_basis": "same contractor",
+      "record": "A-Cube Construction and Supply",
+      "status": "J4 CORROBORATIVE ASSOCIATION"
+    }
+  ],
+  "sources": [
+    {
+      "ref": "turn769364search15",
+      "type": "DBM FY2021 Expenditure Program",
+      "supports": "FY2021 project and UACS 310203206867000 at PHP 12.5M"
+    },
+    {
+      "ref": "turn728856search0",
+      "type": "DPWH Region VIII Annual Infrastructure Program",
+      "supports": "DPWH Project Component ID P00046632VS-CW1, current AIP representation, UACS 165004050305802, PHP 10M"
+    },
+    {
+      "ref": "turn664827search4",
+      "type": "Historical DPWH/PhilGEPS indexed dataset",
+      "supports": "2016 reference 4088342 / 17IJ0004 Cabarasan–Dao Road"
+    },
+    {
+      "ref": "turn664827search5",
+      "type": "CIAP/PDCB CPES report",
+      "supports": "2016 Cabarasan–Dao intervention under CDU Construction"
+    },
+    {
+      "ref": "turn664827search3",
+      "type": "Leyte-Samar Daily Express reproducing DPWH NS 2nd DEO information",
+      "supports": "2021 construction start, A-Cube, 43.60% accomplishment"
+    }
+  ],
+  "g4_score": "3/8",
+  "foi_state": "SUBMITTED / RESPONSE PENDING",
+  "next_evidence_target": "2021 DPWH institutional project/component record → procurement reference → Contract ID"
+}

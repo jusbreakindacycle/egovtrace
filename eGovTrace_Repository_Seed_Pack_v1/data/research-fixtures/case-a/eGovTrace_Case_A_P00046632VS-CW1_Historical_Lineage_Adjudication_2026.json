@@ -1,0 +1,29 @@
+{
+  "case": "A",
+  "project": "Cabarasan to Dao FMR, Gamay, Northern Samar",
+  "selected_2021_fmr_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+  "tested_identifier": "P00046632VS-CW1",
+  "tested_bridge": "2021 selected FMR -> P00046632VS-CW1",
+  "result": "NOT_ESTABLISHED",
+  "historical_lineage": {
+    "project_component_id": "P00046632VS-CW1",
+    "uacs_pap": "165004050305802",
+    "document_date": "2017-03-29",
+    "2016_budget_amount": 10000000,
+    "2016_intervention": true
+  },
+  "selected_2021": {
+    "amount": 12500000,
+    "uacs_direct_release": "310203206922000",
+    "uacs_nep": "310203206867000",
+    "contractor_anchor": "A-Cube Construction and Supply"
+  },
+  "false_join_controls": [
+    "same route/title",
+    "same implementing office",
+    "same physical corridor",
+    "same general project wording"
+  ],
+  "frozen_g4_score": "3/8",
+  "next_branch": "Recover a 2021-specific DPWH project/procurement identifier before financial tracing."
+}

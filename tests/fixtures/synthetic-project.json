@@ -1,0 +1,6 @@
+{
+  "synthetic": true,
+  "project_id": "SYN-PROJ-001",
+  "title": "Synthetic Public Project Alpha",
+  "lifecycle": ["PROJECT_CREATED","BUDGET_APPROVED","PROCUREMENT_POSTED","CONTRACT_AWARDED","PAYMENT_RECORDED","IMPLEMENTATION_REPORTED","VERIFICATION_RECORDED"]
+}

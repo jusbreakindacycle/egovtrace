@@ -1,0 +1,21 @@
+{
+  "artifact": "eGovTrace Case A \u2014 Formal Evidence-Acquisition Attempt",
+  "date": "2026-09-05",
+  "case": "A \u2014 Cabarasan to Dao FMR, Gamay, Northern Samar",
+  "fmr_uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+  "fmr_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+  "amount_php": 12500000,
+  "known_uacs": "310203206922000",
+  "known_contractor_anchor": "A-Cube Construction and Supply",
+  "custodian": "DPWH Northern Samar 2nd District Engineering Office",
+  "procurement_contact_email": "nssdeoproc.bac@gmail.com",
+  "request_prepared": true,
+  "foi_channel_identified": true,
+  "request_submitted": false,
+  "email_sent": false,
+  "agency_response_received": false,
+  "status": "FORMAL REQUEST PACKAGE PREPARED \u2014 SUBMISSION PENDING",
+  "g4_score_preserved": "3/8",
+  "sha256": "d718179b627c5fbe84c7865ee1d79552f510855e4ced80403e6620bb6be8362a",
+  "artifact_path": "/mnt/data/eGovTrace_Case_A_Formal_Evidence_Acquisition_Attempt_2026.md"
+}

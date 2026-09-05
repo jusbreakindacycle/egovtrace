@@ -1,0 +1,51 @@
+{
+  "artifact": "eGovTrace_Case_A_Independent_Bridge_Research_Parallel_2026",
+  "case": {
+    "name": "Cabarasan to Dao FMR, Gamay, Northern Samar",
+    "fmr_uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+    "fmr_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+    "amount_php": 12500000,
+    "uacs": "310203206922000",
+    "implementing_office": "DPWH Northern Samar 2nd District Engineering Office",
+    "contractor_search_anchor": "A-Cube Construction and Supply"
+  },
+  "execution_date": "2026-09-05",
+  "purpose": "Parallel public-source bridge research while formal FOI request is pending",
+  "result": {
+    "project_to_budget": "ESTABLISHED",
+    "implementation_contractor": "DOCUMENTED_AGENCY_ORIGIN_SECONDARY",
+    "primary_procurement": "NOT_ESTABLISHED",
+    "primary_contract": "UNRESOLVED",
+    "financial_execution": "UNRESOLVED",
+    "settlement": "NOT_ESTABLISHED"
+  },
+  "adversarial_tests": [
+    {
+      "test": "same route, different year",
+      "result": "NOT_JOINED",
+      "example": "2016 Cabarasan-Dao vs 2021 selected project"
+    },
+    {
+      "test": "later/current similar representation",
+      "result": "NOT_JOINED",
+      "example": "P00046632VS-CW1"
+    },
+    {
+      "test": "same contractor across projects",
+      "result": "NOT_JOINED",
+      "example": "A-Cube in other Northern Samar projects"
+    },
+    {
+      "test": "same title and geography",
+      "result": "INSUFFICIENT"
+    },
+    {
+      "test": "same UACS/budget representation",
+      "result": "NOT_UNIVERSAL_PROJECT_KEY"
+    }
+  ],
+  "next_branch": "Contractor/project-index triangulation focused on A-Cube + Northern Samar 2nd DEO + 2021 procurement/contract references",
+  "foi_state": "SUBMITTED_PENDING",
+  "g4_score_change": "NONE",
+  "markdown_sha256": "bb0a6d2da655962427a31da6e7e6d8cdc6eb3a40658e77b1acab17a7e3c781db"
+}

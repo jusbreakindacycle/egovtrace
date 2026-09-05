@@ -1,0 +1,1505 @@
+openapi: 3.1.2
+info:
+  title: eGovTrace API
+  version: '1.0.0'
+  summary: Evidence-backed national accountability API
+  description: |
+    eGovTrace is an independent accountability service above fragmented government
+    source systems. Source systems remain authoritative for their own records.
+    eGovTrace provides cross-system reconciliation, evidence/provenance, temporal
+    state, control signals, citizen reporting, case workflow, and authorized
+    assurance views.
+
+    Governing safety rules:
+      - CONNECTION != CORRUPTION
+      - IDENTIFIER RECOVERY != IDENTIFIER PROOF
+      - NOT OBSERVED != ABSENT
+      - UNAVAILABLE != FALSE
+      - PAYMENT-INSTRUCTION EVIDENCE != PAYMENT-SETTLEMENT EVIDENCE
+      - AI OUTPUT != FACT OR LEGAL DETERMINATION
+      - Every material derivation requires provenance.
+      - Public projections never expose the raw assurance graph.
+  contact:
+    name: eGovTrace engineering
+  license:
+    name: To be determined
+servers:
+  - url: https://api.egovtrace.gov.ph
+    description: Production endpoint placeholder; activation requires deployment and government validation.
+tags:
+  - name: Public Search
+  - name: Public Objects
+  - name: Public Reports
+  - name: Public Evidence
+  - name: Assurance Objects
+  - name: Assurance Bridges
+  - name: Assurance Cases
+  - name: Admin Sources
+  - name: Admin Rules
+  - name: Admin Audit
+  - name: Internal
+security:
+  - {}
+paths:
+  /api/v1/public/search:
+    get:
+      tags: [Public Search]
+      summary: Search public eGovTrace projections
+      operationId: publicSearch
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Query'
+        - $ref: '#/components/parameters/ObjectType'
+        - $ref: '#/components/parameters/InstitutionId'
+        - $ref: '#/components/parameters/JurisdictionId'
+        - $ref: '#/components/parameters/LocationId'
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/EventFrom'
+        - $ref: '#/components/parameters/EventTo'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSearchResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/public/objects/{id}:
+    get:
+      tags: [Public Objects]
+      summary: Get a public object projection
+      operationId: getPublicObject
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Public object projection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicObjectResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /api/v1/public/projects/{id}:
+    get:
+      tags: [Public Objects]
+      summary: Get a public project projection
+      operationId: getPublicProject
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Public project projection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProjectResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/public/entities/{id}:
+    get:
+      tags: [Public Objects]
+      summary: Get a public entity projection
+      operationId: getPublicEntity
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Public external entity projection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicEntityResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/public/services/{id}:
+    get:
+      tags: [Public Objects]
+      summary: Get a public service projection
+      operationId: getPublicService
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Public service projection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicServiceResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/public/evidence/{id}:
+    get:
+      tags: [Public Evidence]
+      summary: Get public evidence metadata
+      operationId: getPublicEvidence
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Public evidence metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicEvidenceResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/public/reports:
+    post:
+      tags: [Public Reports]
+      summary: Submit a citizen report
+      operationId: createPublicReport
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportRequest'
+      responses:
+        '201':
+          description: Report created or durably accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /api/v1/public/reports/{id}:
+    get:
+      tags: [Public Reports]
+      summary: Get citizen report tracking status
+      operationId: getPublicReport
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Report status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/public/reports/{id}/attachments/sessions:
+    post:
+      tags: [Public Reports]
+      summary: Create resumable evidence upload session
+      operationId: createEvidenceUploadSession
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUploadSessionRequest'
+      responses:
+        '201':
+          description: Upload session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSessionResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/v1/public/uploads/{uploadSessionId}/complete:
+    post:
+      tags: [Public Reports]
+      summary: Finalize a citizen evidence upload
+      operationId: finalizeEvidenceUpload
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/UploadSessionId'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizeUploadRequest'
+      responses:
+        '201':
+          description: Evidence object registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /api/v1/assurance/objects/{id}:
+    get:
+      tags: [Assurance Objects]
+      summary: Get an authorized assurance projection
+      operationId: getAssuranceObject
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Assurance object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssuranceObjectResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/assurance/signals/{id}:
+    get:
+      tags: [Assurance Objects]
+      summary: Get a control signal
+      operationId: getAssuranceSignal
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Control signal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/assurance/bridges/{id}:
+    get:
+      tags: [Assurance Bridges]
+      summary: Get identity bridge
+      operationId: getIdentityBridge
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Identity bridge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityBridgeResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Assurance Bridges]
+      summary: Adjudicate an identity bridge
+      operationId: adjudicateIdentityBridge
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdjudicateBridgeRequest'
+      responses:
+        '200':
+          description: Updated bridge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityBridgeResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /api/v1/assurance/cases/{id}:
+    get:
+      tags: [Assurance Cases]
+      summary: Get an assurance case
+      operationId: getAssuranceCase
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Case
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/assurance/cases/{id}/route:
+    post:
+      tags: [Assurance Cases]
+      summary: Submit a routing decision for review
+      operationId: routeCase
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteCaseRequest'
+      responses:
+        '200':
+          description: Case after route command
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/v1/assurance/cases/{id}/transitions:
+    post:
+      tags: [Assurance Cases]
+      summary: Transition case state
+      operationId: transitionCase
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseTransitionRequest'
+      responses:
+        '200':
+          description: Case after transition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /api/v1/assurance/cases/{id}/close:
+    post:
+      tags: [Assurance Cases]
+      summary: Close an assurance case
+      operationId: closeCase
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseCaseRequest'
+      responses:
+        '200':
+          description: Closed case
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/v1/admin/sources:
+    get:
+      tags: [Admin Sources]
+      summary: List registered sources
+      operationId: listSources
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Source registry entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceListResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/admin/connectors/{id}/health:
+    get:
+      tags: [Admin Sources]
+      summary: Get connector health
+      operationId: getConnectorHealth
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Connector health
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorHealthResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/admin/connectors/{id}/runs:
+    post:
+      tags: [Admin Sources]
+      summary: Start a connector run
+      operationId: runConnector
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectorRunRequest'
+      responses:
+        '202':
+          description: Connector run accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/v1/admin/runs/{id}:
+    get:
+      tags: [Admin Sources]
+      summary: Get connector/job run status
+      operationId: getRun
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+      responses:
+        '200':
+          description: Job/run status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/admin/rules:
+    post:
+      tags: [Admin Rules]
+      summary: Create a draft control rule
+      operationId: createControlRule
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateControlRuleRequest'
+      responses:
+        '201':
+          description: Draft control rule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlRuleResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/admin/rules/{id}/publish:
+    post:
+      tags: [Admin Rules]
+      summary: Publish a validated control rule version
+      operationId: publishControlRule
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ObjectId'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishRuleRequest'
+      responses:
+        '200':
+          description: Published rule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlRuleResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/v1/admin/access-policies:
+    post:
+      tags: [Admin Audit]
+      summary: Publish an access policy version
+      operationId: publishAccessPolicy
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessPolicyRequest'
+      responses:
+        '201':
+          description: Access policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessPolicyResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/v1/admin/audit-logs:
+    get:
+      tags: [Admin Audit]
+      summary: Query administrative audit events
+      operationId: getAuditLogs
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/EventFrom'
+        - $ref: '#/components/parameters/EventTo'
+      responses:
+        '200':
+          description: Audit log page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogPageResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/v1/internal/ingestion/runs:
+    post:
+      tags: [Internal]
+      summary: Start an internal connector ingestion command
+      operationId: internalStartIngestion
+      security:
+        - serviceBearer: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionCommand'
+      responses:
+        '202':
+          description: Ingestion job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Authorized human identity token. Exact identity provider is deployment-specific and not frozen here.
+    serviceBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Service-to-service credential for approved internal callers.
+  parameters:
+    ObjectId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 3
+    UploadSessionId:
+      name: uploadSessionId
+      in: path
+      required: true
+      schema:
+        type: string
+    Query:
+      name: q
+      in: query
+      required: false
+      schema: { type: string, maxLength: 500 }
+    ObjectType:
+      name: object_type
+      in: query
+      schema:
+        $ref: '#/components/schemas/ObjectType'
+    InstitutionId:
+      name: institution_id
+      in: query
+      schema: { type: string }
+    JurisdictionId:
+      name: jurisdiction_id
+      in: query
+      schema: { type: string }
+    LocationId:
+      name: location_id
+      in: query
+      schema: { type: string }
+    Status:
+      name: status
+      in: query
+      schema: { type: string }
+    EventFrom:
+      name: event_from
+      in: query
+      schema: { type: string, format: date }
+    EventTo:
+      name: event_to
+      in: query
+      schema: { type: string, format: date }
+    PageSize:
+      name: page_size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 25 }
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+    RequestIdHeader:
+      name: X-Request-ID
+      in: header
+      required: false
+      schema: { type: string, minLength: 8, maxLength: 100 }
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 200 }
+  responses:
+    BadRequest:
+      description: Invalid request
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+    Unauthorized:
+      description: Authentication required
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+    Forbidden:
+      description: Action or data not authorized
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+    NotFound:
+      description: Object not found or not publicly addressable
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+    Conflict:
+      description: Idempotency, concurrency, or state-transition conflict
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+    Unprocessable:
+      description: Semantically invalid or policy-rejected request
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+    PayloadTooLarge:
+      description: Payload exceeds policy limit
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+    InternalError:
+      description: Internal error
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } }
+  schemas:
+    ObjectType:
+      type: string
+      enum: [INSTITUTION, UNIT, PERSON_ROLE, EXTERNAL_ENTITY, JURISDICTION, PROJECT, PROGRAM, BUDGET, APPROPRIATION, ALLOTMENT, PROCUREMENT, AWARD, CONTRACT, NTP, OBLIGATION, DISBURSEMENT, PAYMENT, ASSET, LOCATION, SERVICE, APPLICATION, PERMIT, LICENSE, TRANSACTION, SHIPMENT, BILL_OF_LADING, CUSTOMS_DECLARATION, ASSESSMENT, RELEASE, INSPECTION, EVENT, EVIDENCE, SNAPSHOT, IDENTITY_BRIDGE, CONTROL_RULE, CONTROL_STATE, SIGNAL, REPORT, CASE, RESPONSE, RESOLUTION, OUTCOME, AUDIT_FINDING, POLICY, LAW, ORDINANCE]
+    StatusCode:
+      type: string
+      enum: [CONFIRMED, REPORTED, UNRESOLVED, NOT_ESTABLISHED, NOT_PUBLICLY_AVAILABLE, SUPERSEDED, RETRACTED]
+    AccessClass:
+      type: string
+      enum: [PUBLIC, PUBLIC_WITH_LIMITATION, AUTHENTICATED_CITIZEN, GOVERNMENT_INTERNAL, ASSURANCE_RESTRICTED, CONFIDENTIAL_EXTERNAL_CUSTODY, SECURITY_RESTRICTED]
+    Confidence:
+      type: string
+      enum: [HIGH, MEDIUM, LOW, UNKNOWN]
+    AdjudicationState:
+      type: string
+      enum: [PROPOSED, SUPPORTED, CONFIRMED, REJECTED, SUPERSEDED, UNRESOLVED]
+    BasisType:
+      type: string
+      enum: [EXACT_NATIVE_IDENTIFIER, DOCUMENT_EXPLICIT_REFERENCE, EXPLICIT_SOURCE_CROSSREFERENCE, STRUCTURED_MULTI_FIELD_MATCH, TEMPORAL_AND_LOCATION_CORROBORATION, NAME_ONLY_MATCH, AMOUNT_ONLY_MATCH, MODEL_SUGGESTION, HUMAN_CONFIRMED, HUMAN_REJECTED]
+    PublicStatus:
+      type: object
+      required: [code, label]
+      properties:
+        code: { $ref: '#/components/schemas/StatusCode' }
+        label: { type: string }
+    EvidenceSummary:
+      type: object
+      required: [confirmed, reported, unresolved, not_established]
+      properties:
+        confirmed: { type: integer, minimum: 0 }
+        reported: { type: integer, minimum: 0 }
+        unresolved: { type: integer, minimum: 0 }
+        not_established: { type: integer, minimum: 0 }
+    Pagination:
+      type: object
+      required: [has_more]
+      properties:
+        next_cursor: { type: [string, 'null'] }
+        has_more: { type: boolean }
+    ApiMeta:
+      type: object
+      required: [generated_at]
+      properties:
+        request_id: { type: [string, 'null'] }
+        version: { type: [integer, 'null'], minimum: 1 }
+        generated_at: { type: string, format: date-time }
+    ApiEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data: {}
+        meta: { $ref: '#/components/schemas/ApiMeta' }
+    PaginatedSearchResponse:
+      type: object
+      required: [data, pagination, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/SearchResult' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+        meta: { $ref: '#/components/schemas/ApiMeta' }
+    SearchResult:
+      type: object
+      required: [id, type, title, status]
+      properties:
+        id: { type: string }
+        type: { $ref: '#/components/schemas/ObjectType' }
+        title: { type: string }
+        status: { $ref: '#/components/schemas/PublicStatus' }
+        evidence_summary: { $ref: '#/components/schemas/EvidenceSummary' }
+        match_kind:
+          type: string
+          enum: [EXACT_ID, EXACT_NATIVE_IDENTIFIER, EXACT_TITLE, EXACT_INSTITUTION, EXACT_PLACE, STRONG_RELATION, FUZZY_CANDIDATE]
+        candidate_note: { type: [string, 'null'] }
+    PublicObject:
+      type: object
+      required: [id, type, status, evidence_summary]
+      properties:
+        id: { type: string }
+        type: { $ref: '#/components/schemas/ObjectType' }
+        title: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/PublicStatus' }
+        responsible_institution:
+          type: [object, 'null']
+          properties:
+            id: { type: string }
+            name: { type: string }
+        money_resource:
+          type: [object, 'null']
+          properties:
+            amount: { type: number }
+            currency: { type: string, minLength: 3, maxLength: 3 }
+            status: { type: string }
+        timeline:
+          type: array
+          items: { $ref: '#/components/schemas/PublicTimelineEvent' }
+        known:
+          type: array
+          items: { type: object, additionalProperties: true }
+        not_established:
+          type: array
+          items: { $ref: '#/components/schemas/EvidenceGap' }
+        related_records:
+          type: array
+          items: { $ref: '#/components/schemas/RelationshipSummary' }
+        evidence:
+          type: array
+          items: { $ref: '#/components/schemas/PublicEvidence' }
+        evidence_summary: { $ref: '#/components/schemas/EvidenceSummary' }
+        report_action: { type: boolean }
+    PublicTimelineEvent:
+      type: object
+      required: [event_type, event_date, status]
+      properties:
+        event_type: { type: string }
+        event_date: { type: string, format: date }
+        status: { type: string }
+        label: { type: [string, 'null'] }
+        source_name: { type: [string, 'null'] }
+    RelationshipSummary:
+      type: object
+      required: [relationship, linked_object, status]
+      properties:
+        relationship: { type: string }
+        linked_object: { $ref: '#/components/schemas/PublicObjectRef' }
+        status: { $ref: '#/components/schemas/StatusCode' }
+        basis_type: { $ref: '#/components/schemas/BasisType' }
+        basis_detail: { type: [string, 'null'] }
+        evidence_ids: { type: array, items: { type: string } }
+        confidence: { $ref: '#/components/schemas/Confidence' }
+        adjudication_state: { $ref: '#/components/schemas/AdjudicationState' }
+        valid_from: { type: [string, 'null'], format: date }
+        valid_to: { type: [string, 'null'], format: date }
+    PublicObjectRef:
+      type: object
+      required: [id, type]
+      properties:
+        id: { type: string }
+        type: { $ref: '#/components/schemas/ObjectType' }
+        title: { type: [string, 'null'] }
+    PublicProjectResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/PublicObject' }
+    PublicObjectResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/PublicObject' }
+    PublicEntityResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PublicEntity'
+    PublicServiceResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PublicService'
+    PublicEntity:
+      type: object
+      required: [id, legal_name, status]
+      properties:
+        id: { type: string }
+        legal_name: { type: string }
+        trade_names: { type: array, items: { type: string } }
+        status: { $ref: '#/components/schemas/PublicStatus' }
+        public_identifiers: { type: array, items: { type: string } }
+        relationships: { type: array, items: { $ref: '#/components/schemas/RelationshipSummary' } }
+        evidence: { type: array, items: { $ref: '#/components/schemas/PublicEvidence' } }
+    PublicService:
+      type: object
+      required: [id, service_name, status]
+      properties:
+        id: { type: string }
+        service_name: { type: string }
+        status: { $ref: '#/components/schemas/PublicStatus' }
+        institution: { $ref: '#/components/schemas/PublicObjectRef' }
+        charter_reference: { type: [string, 'null'] }
+        public_process:
+          type: array
+          items: { type: string }
+        evidence: { type: array, items: { $ref: '#/components/schemas/PublicEvidence' } }
+    PublicEvidence:
+      type: object
+      required: [id, source, status, strength]
+      properties:
+        id: { type: string }
+        source:
+          type: object
+          required: [name]
+          properties:
+            id: { type: [string, 'null'] }
+            name: { type: string }
+            record: { type: [string, 'null'] }
+        date: { type: [string, 'null'], format: date }
+        link_basis: { type: [string, 'null'] }
+        strength: { type: string }
+        status: { type: string }
+        source_url: { type: [string, 'null'], format: uri }
+    PublicEvidenceResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/PublicEvidence' }
+    EvidenceGap:
+      type: object
+      required: [id, reason_state, status]
+      properties:
+        id: { type: string }
+        expected_evidence_type: { type: [string, 'null'] }
+        expected_source_id: { type: [string, 'null'] }
+        expected_event_type: { type: [string, 'null'] }
+        reason_state:
+          type: string
+          enum: [NOT_PUBLICLY_RECOVERED, RESTRICTED, SOURCE_UNAVAILABLE, NOT_REQUESTED, REQUEST_PENDING, REQUEST_DENIED, REQUEST_FULFILLED, NOT_APPLICABLE]
+        status: { type: string }
+        public_language: { type: string }
+    LocationInput:
+      type: object
+      required: [latitude, longitude, capture_method]
+      properties:
+        latitude: { type: number, minimum: -90, maximum: 90 }
+        longitude: { type: number, minimum: -180, maximum: 180 }
+        accuracy_m: { type: [number, 'null'], minimum: 0 }
+        capture_method:
+          type: string
+          enum: [GPS, USER_PIN, SEARCH, KNOWN_PROJECT, OTHER]
+        captured_at: { type: [string, 'null'], format: date-time }
+    PrivacyChoices:
+      type: object
+      properties:
+        allow_follow_up: { type: boolean, default: false }
+        public_identity: { type: boolean, default: false }
+      additionalProperties: false
+    CreateReportRequest:
+      type: object
+      required: [draft_id, category, description, privacy_choices]
+      properties:
+        draft_id: { type: string, minLength: 1, maxLength: 120 }
+        observed_at: { type: [string, 'null'], format: date-time }
+        location: { $ref: '#/components/schemas/LocationInput' }
+        category:
+          type: string
+          enum: [PROJECT, PROCUREMENT, PUBLIC_SERVICE, PERMIT_LICENSE, PAYMENT_COLLECTION, ASSET_CONDITION, CONSTRUCTION, CUSTOMS_TRADE, TRANSPORT, ENVIRONMENT, SAFETY, OFFICIAL_CONDUCT, OTHER]
+        description: { type: string, minLength: 1, maxLength: 10000 }
+        related_object_candidates: { type: array, items: { type: string }, maxItems: 20 }
+        contact_preference:
+          type: string
+          enum: [NONE, TRACK_WITH_ACCOUNT, FOLLOW_UP]
+          default: NONE
+        privacy_choices: { $ref: '#/components/schemas/PrivacyChoices' }
+      additionalProperties: false
+    ReportResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Report'
+    Report:
+      type: object
+      required: [report_id, status, submitted_at]
+      properties:
+        report_id: { type: string }
+        status:
+          type: string
+          enum: [DRAFT, SUBMITTED, RECEIVED, TRIAGE, EVIDENCE_REVIEW, ROUTED, ACKNOWLEDGED, UNDER_REVIEW, RESPONSE_RECEIVED, RESOLUTION_RECORDED, CLOSED, CONTINUING_MONITORING, NEEDS_MORE_INFORMATION, DUPLICATE_MERGED, OUTSIDE_SCOPE, REFERRED, UNRESOLVED]
+        submitted_at: { type: string, format: date-time }
+        observed_at: { type: [string, 'null'], format: date-time }
+        category: { type: [string, 'null'] }
+        location_precision: { type: [string, 'null'] }
+        related_object_candidates: { type: array, items: { $ref: '#/components/schemas/PublicObjectRef' } }
+        evidence_ids: { type: array, items: { type: string } }
+        public_language: { type: [string, 'null'] }
+    CreateUploadSessionRequest:
+      type: object
+      required: [filename, content_type, size_bytes]
+      properties:
+        filename: { type: string, minLength: 1, maxLength: 255 }
+        content_type: { type: string, minLength: 1, maxLength: 255 }
+        size_bytes: { type: integer, minimum: 1 }
+        sha256: { type: [string, 'null'], pattern: '^[A-Fa-f0-9]{64}$' }
+      additionalProperties: false
+    UploadSessionResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [upload_session_id, chunk_size_bytes, upload_url, expires_at]
+              properties:
+                upload_session_id: { type: string }
+                chunk_size_bytes: { type: integer, minimum: 1 }
+                upload_url: { type: string, format: uri }
+                expires_at: { type: string, format: date-time }
+    FinalizeUploadRequest:
+      type: object
+      properties:
+        sha256: { type: [string, 'null'], pattern: '^[A-Fa-f0-9]{64}$' }
+      additionalProperties: false
+    EvidenceResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/EvidenceRecord'
+    EvidenceRecord:
+      type: object
+      required: [id, content_hash, access_class, status]
+      properties:
+        id: { type: string }
+        content_hash: { type: string }
+        access_class: { $ref: '#/components/schemas/AccessClass' }
+        status: { type: string }
+        provenance_ids: { type: array, items: { type: string } }
+        original_preserved: { type: boolean }
+        public_available: { type: boolean }
+    AssuranceObjectResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/AssuranceObject' }
+    AssuranceObject:
+      type: object
+      required: [id, type]
+      properties:
+        id: { type: string }
+        type: { $ref: '#/components/schemas/ObjectType' }
+        signals: { type: array, items: { type: string } }
+        control_states: { type: array, items: { type: string } }
+        identity_bridges: { type: array, items: { type: string } }
+        evidence_gaps: { type: array, items: { type: string } }
+        contradictions: { type: array, items: { type: string } }
+        restricted_evidence_refs: { type: array, items: { type: string } }
+        routing_candidates: { type: array, items: { type: string } }
+        case_context: { type: array, items: { type: string } }
+    SignalResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Signal' }
+    Signal:
+      type: object
+      required: [id, rule_id, rule_version, object_id, signal_type, status]
+      properties:
+        id: { type: string }
+        rule_id: { type: string }
+        rule_version: { type: string }
+        object_id: { type: string }
+        signal_type: { type: string }
+        trigger_basis: { type: array, items: { type: string } }
+        missing_evidence_ids: { type: array, items: { type: string } }
+        possible_explanations: { type: array, items: { type: string } }
+        confidence: { $ref: '#/components/schemas/Confidence' }
+        status: { type: string }
+        human_adjudication: { type: [string, 'null'] }
+        routing_candidate: { type: [string, 'null'] }
+        generated_at: { type: string, format: date-time }
+    IdentityBridgeResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/IdentityBridge' }
+    IdentityBridge:
+      type: object
+      required: [id, object_a_id, object_b_id, basis_type, adjudication_state]
+      properties:
+        id: { type: string }
+        object_a_id: { type: string }
+        object_b_id: { type: string }
+        basis_type: { $ref: '#/components/schemas/BasisType' }
+        basis_detail: { type: string }
+        evidence_ids: { type: array, items: { type: string } }
+        confidence: { $ref: '#/components/schemas/Confidence' }
+        adjudication_state: { $ref: '#/components/schemas/AdjudicationState' }
+        valid_from: { type: [string, 'null'], format: date-time }
+        valid_to: { type: [string, 'null'], format: date-time }
+        version: { type: integer, minimum: 1 }
+    AdjudicateBridgeRequest:
+      type: object
+      required: [expected_version, decision, basis_type, evidence_ids, rationale]
+      properties:
+        expected_version: { type: integer, minimum: 1 }
+        decision:
+          type: string
+          enum: [SUPPORTED, CONFIRMED, REJECTED, SUPERSEDED, UNRESOLVED]
+        basis_type: { $ref: '#/components/schemas/BasisType' }
+        evidence_ids: { type: array, items: { type: string }, minItems: 1 }
+        rationale: { type: string, minLength: 1, maxLength: 10000 }
+      additionalProperties: false
+    CaseResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Case' }
+    Case:
+      type: object
+      required: [id, status, priority]
+      properties:
+        id: { type: string }
+        case_type: { type: string }
+        origin_type: { type: string }
+        origin_object_ids: { type: array, items: { type: string } }
+        lead_institution_id: { type: [string, 'null'] }
+        candidate_authority_ids: { type: array, items: { type: string } }
+        status: { type: string }
+        priority: { type: string, enum: [LOW, NORMAL, HIGH, CRITICAL] }
+        opened_at: { type: string, format: date-time }
+        closed_at: { type: [string, 'null'], format: date-time }
+        resolution_id: { type: [string, 'null'] }
+        routing_recommendations: { type: array, items: { type: string } }
+        responses: { type: array, items: { type: string } }
+        official_record_refs: { type: array, items: { type: string } }
+    RouteCaseRequest:
+      type: object
+      required: [candidate_authority_id, basis, required_evidence]
+      properties:
+        candidate_authority_id: { type: string }
+        basis: { type: string, minLength: 1 }
+        required_evidence: { type: array, items: { type: string } }
+        routing_note: { type: [string, 'null'], maxLength: 10000 }
+      additionalProperties: false
+    CaseTransitionRequest:
+      type: object
+      required: [expected_version, target_state, reason]
+      properties:
+        expected_version: { type: integer, minimum: 1 }
+        target_state: { type: string }
+        reason: { type: string, minLength: 1 }
+      additionalProperties: false
+    CloseCaseRequest:
+      type: object
+      required: [expected_version, resolution_type, result_summary, supporting_evidence_ids]
+      properties:
+        expected_version: { type: integer, minimum: 1 }
+        resolution_type:
+          type: string
+          enum: [EXPLAINED, CORRECTED, REMEDIED, REFERRED, OUTSIDE_SCOPE, DUPLICATE, UNRESOLVED, NO_ACTION_RECORDED, OFFICIAL_FINDING]
+        result_summary: { type: string, minLength: 1, maxLength: 20000 }
+        supporting_evidence_ids: { type: array, items: { type: string } }
+        review_reference: { type: [string, 'null'] }
+      additionalProperties: false
+    SourceListResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/Source' }
+    Source:
+      type: object
+      required: [source_id, source_name, source_type, connector_status]
+      properties:
+        source_id: { type: string }
+        institution_id: { type: string }
+        source_name: { type: string }
+        source_owner: { type: string }
+        source_type: { type: string }
+        authority_domain: { type: [string, 'null'] }
+        canonical_homepage: { type: [string, 'null'], format: uri }
+        public_access: { type: boolean }
+        api_available: { type: boolean }
+        authentication_required: { type: boolean }
+        foi_available: { type: boolean }
+        restricted_access: { type: boolean }
+        identifier_types: { type: array, items: { type: string } }
+        update_frequency: { type: [string, 'null'] }
+        historical_availability: { type: [string, 'null'] }
+        source_time_zone: { type: [string, 'null'] }
+        data_classification: { type: [string, 'null'] }
+        connector_status: { type: string }
+        connector_version: { type: [string, 'null'] }
+        last_successful_observation: { type: [string, 'null'], format: date-time }
+        last_failed_observation: { type: [string, 'null'], format: date-time }
+    ConnectorHealthResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [connector_id, status]
+              properties:
+                connector_id: { type: string }
+                status: { type: string }
+                last_success: { type: [string, 'null'], format: date-time }
+                last_failure: { type: [string, 'null'], format: date-time }
+                latency_ms: { type: [integer, 'null'], minimum: 0 }
+                error_code: { type: [string, 'null'] }
+                schema_version: { type: [string, 'null'] }
+                parser_version: { type: [string, 'null'] }
+    ConnectorRunRequest:
+      type: object
+      required: [run_type]
+      properties:
+        run_type:
+          type: string
+          enum: [FULL, INCREMENTAL, BACKFILL, REPROCESS]
+        scope:
+          type: object
+          additionalProperties: true
+        requested_by: { type: string }
+      additionalProperties: false
+    IngestionCommand:
+      type: object
+      required: [source_id, connector_id, run_type]
+      properties:
+        source_id: { type: string }
+        connector_id: { type: string }
+        run_type:
+          type: string
+          enum: [FULL, INCREMENTAL, BACKFILL, REPROCESS]
+        scope:
+          type: object
+          additionalProperties: true
+        requested_by: { type: string }
+      additionalProperties: false
+    JobResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Job' }
+    Job:
+      type: object
+      required: [job_id, job_type, status, created_at]
+      properties:
+        job_id: { type: string }
+        job_type: { type: string }
+        input_ids: { type: array, items: { type: string } }
+        status: { type: string, enum: [QUEUED, RUNNING, SUCCEEDED, FAILED, RETRYING, DEAD_LETTERED, CANCELLED] }
+        started_at: { type: [string, 'null'], format: date-time }
+        completed_at: { type: [string, 'null'], format: date-time }
+        worker_version: { type: [string, 'null'] }
+        error_code: { type: [string, 'null'] }
+        retry_count: { type: integer, minimum: 0 }
+        correlation_id: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+    CreateControlRuleRequest:
+      type: object
+      required: [domain, name, description, expected_sequence, required_inputs, output_type, review_requirement]
+      properties:
+        domain: { type: string }
+        name: { type: string }
+        description: { type: string }
+        expected_sequence: { type: array, items: { type: string } }
+        required_inputs: { type: array, items: { type: string } }
+        comparison_population: { type: [string, 'null'] }
+        threshold_definition: { type: [string, 'null'] }
+        exception_policy: { type: [object, 'null'], additionalProperties: true }
+        output_type: { type: string }
+        review_requirement: { type: string }
+      additionalProperties: false
+    PublishRuleRequest:
+      type: object
+      required: [expected_version, publication_note]
+      properties:
+        expected_version: { type: string }
+        publication_note: { type: string }
+      additionalProperties: false
+    ControlRuleResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [rule_id, version, status]
+              properties:
+                rule_id: { type: string }
+                version: { type: string }
+                domain: { type: string }
+                name: { type: string }
+                status: { type: string }
+                published_at: { type: [string, 'null'], format: date-time }
+    AccessPolicyRequest:
+      type: object
+      required: [policy_id, target_type, target_pattern, access_class, effect, reason]
+      properties:
+        policy_id: { type: string }
+        target_type: { type: string }
+        target_pattern: { type: string }
+        access_class: { $ref: '#/components/schemas/AccessClass' }
+        effect: { type: string, enum: [ALLOW, DENY, REDACT] }
+        reason: { type: string }
+      additionalProperties: false
+    AccessPolicyResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [policy_id, version]
+              properties:
+                policy_id: { type: string }
+                version: { type: integer, minimum: 1 }
+                status: { type: string }
+    AuditLogPageResponse:
+      type: object
+      required: [data, pagination, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AuditLog' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+        meta: { $ref: '#/components/schemas/ApiMeta' }
+    AuditLog:
+      type: object
+      required: [log_id, actor_id, action, object_id, timestamp]
+      properties:
+        log_id: { type: string }
+        actor_id: { type: string }
+        actor_role: { type: string }
+        action: { type: string }
+        object_id: { type: string }
+        before_version: { type: [integer, 'null'] }
+        after_version: { type: [integer, 'null'] }
+        timestamp: { type: string, format: date-time }
+        reason: { type: [string, 'null'] }
+        request_id: { type: [string, 'null'] }
+        source_ip_or_service: { type: [string, 'null'] }
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, request_id]
+          properties:
+            code:
+              type: string
+              enum: [INVALID_REQUEST, AUTHENTICATION_REQUIRED, ACCESS_DENIED, NOT_FOUND, DUPLICATE_REQUEST, CONCURRENCY_CONFLICT, INVALID_STATE_TRANSITION, INVALID_IDENTITY_DECISION, MISSING_REQUIRED_EVIDENCE, EVIDENCE_RESTRICTED, EVIDENCE_GAP, SOURCE_UNAVAILABLE, AUTHENTICATION_FAILED, SCHEMA_CHANGED, PARSER_FAILED, IDENTITY_UNRESOLVED, POLICY_REJECTED, PAYLOAD_TOO_LARGE, RATE_LIMITED, INTERNAL_ERROR]
+            message: { type: string }
+            request_id: { type: [string, 'null'] }
+            details: { type: [object, 'null'], additionalProperties: true }
+            retryable: { type: boolean }
+            retry_after_seconds: { type: [integer, 'null'], minimum: 0 }
+    EventEnvelope:
+      type: object
+      required: [event_id, event_type, event_version, occurred_at, produced_at, correlation_id, producer, subject]
+      properties:
+        event_id: { type: string }
+        event_type: { type: string }
+        event_version: { type: string }
+        occurred_at: { type: string, format: date-time }
+        produced_at: { type: string, format: date-time }
+        correlation_id: { type: string }
+        causation_id: { type: [string, 'null'] }
+        producer: { type: string }
+        subject: { type: string }
+        payload: { type: object, additionalProperties: true }
+        provenance_ids: { type: array, items: { type: string } }
+        access_class: { $ref: '#/components/schemas/AccessClass' }
+    SourceSnapshotCreated:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: source.snapshot.created }
+    ObjectCreated:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: object.created }
+    BridgeProposed:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: bridge.proposed }
+    BridgeAdjudicated:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: bridge.adjudicated }
+    ControlEvaluated:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: control.evaluated }
+    SignalCreated:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: signal.created }
+    EvidenceGapCreated:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: evidence.gap.created }
+    ReportSubmitted:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: report.submitted }
+    ReportMatched:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: report.matched }
+    CaseOpened:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: case.opened }
+    CaseRouted:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: case.routed }
+    ResponseReceived:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: response.received }
+    ResolutionRecorded:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            event_type: { const: resolution.recorded }
+externalDocs:
+  description: OpenAPI Specification 3.1.2
+  url: https://spec.openapis.org/oas/v3.1.2.html

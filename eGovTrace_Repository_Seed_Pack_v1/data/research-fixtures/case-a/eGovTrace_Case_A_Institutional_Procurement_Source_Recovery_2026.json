@@ -1,0 +1,31 @@
+{
+  "artifact": "eGovTrace_Case_A_Institutional_Procurement_Source_Recovery_2026",
+  "study": "eGovTrace Identity & Interoperability Validation Study",
+  "case": {
+    "label": "Case A",
+    "project": "Concreting of Brgy. Cabarasan to Brgy. Dao FMR, Brgy. Cabarasan and Brgy. Dao, Gamay, Northern Samar",
+    "fmr_uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+    "fmr_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+    "amount_php": 12500000
+  },
+  "g4": {"status": "frozen", "score": "3/8", "rescore": false},
+  "branch": "institutional procurement-source recovery",
+  "result": "PROCUREMENT BRIDGE NOT RECOVERED FROM PUBLIC / INDEXED INSTITUTIONAL SOURCES",
+  "links": [
+    {"from":"project","to":"budget","status":"CONFIRMED","join_type":"J1/J3 support","evidence":"DBM FY2021 GAA/direct-release representations"},
+    {"from":"project","to":"primary_procurement","status":"NOT ESTABLISHED","join_type":null,"evidence":"No defensible exact primary procurement record recovered"},
+    {"from":"primary_procurement","to":"award","status":"UNRESOLVED","join_type":null,"evidence":"No primary procurement anchor established"},
+    {"from":"award","to":"contract","status":"UNRESOLVED","join_type":null,"evidence":"Agency-origin secondary contract report is not primary contract recovery"},
+    {"from":"contract","to":"financial_execution","status":"UNRESOLVED","join_type":null,"evidence":"No project-specific primary contract anchor"}
+  ],
+  "false_join_tests": [
+    {"id":"FJ-01","candidate":"2016 Cabarasan-Dao FMR / CDU Construction / ~PHP 9.173M","disposition":"REJECTED JOIN"},
+    {"id":"FJ-02","candidate":"Current DPWH Annual Infrastructure Program representation P00046632VS-CW1","disposition":"NOT JOINED"},
+    {"id":"FJ-03","candidate":"A-Cube contractor reuse in other Northern Samar projects","disposition":"NOT SUFFICIENT"},
+    {"id":"FJ-04","candidate":"Same PHP 12.5M amount","disposition":"NOT SUFFICIENT"},
+    {"id":"FJ-05","candidate":"Same locality / implementing office","disposition":"NOT SUFFICIENT"}
+  ],
+  "foi": {"identified_as_next_evidence_channel": true, "executed": false},
+  "interpretation": "Evidence gap localized at project-to-primary-procurement transition; no conclusion of non-procurement, non-obligation, or non-payment.",
+  "next_step": "Formal institutional-record acquisition attempt with implementing procurement/accounting custodian."
+}

@@ -1,0 +1,104 @@
+{
+  "workstream": "G4 controlled deepening / PIP-CTRL-01G",
+  "execution_timestamp_utc": "2026-09-05T03:04:43.193503+00:00",
+  "gate_status": "G4 remains FROZEN at 3/8 for each candidate",
+  "candidates": [
+    {
+      "uuid": "5eff0b52-8f48-456b-9246-7e623533ea4e",
+      "frame_index": 3724,
+      "project": "Concreting of Purok 5 to Sitio Kaliloan/Kalilaan, Brgy. Poblacion FMR, Brgy. Poblacion, Bunawan, Agusan del Sur",
+      "program_code": "2024-R13-ADS-INFRA-FMRDP-FMR-00329",
+      "supplementary_trace": {
+        "budget": {
+          "status": "CONFIRMED",
+          "uacs": "310203211128000",
+          "amount": 10000000,
+          "fiscal_year": 2024,
+          "note": "DBM FY2024 GAA/related direct-release document uses 'Kaliloan' in one representation and 'Kalilaan' in another. The name variant is recorded rather than normalized away."
+        },
+        "procurement": {
+          "status": "SEARCHED_NOT_FOUND",
+          "primary_project_level_record": false,
+          "note": "Targeted web searches did not recover a defensible project-specific PhilGEPS/DPWH procurement notice, award, contract number, or NTP for this exact intervention."
+        },
+        "contract": {
+          "status": "UNRESOLVED",
+          "note": "No project-specific contract identifier was established."
+        },
+        "financial_execution": {
+          "status": "UNRESOLVED",
+          "note": "No project-specific obligation, disbursement, payment, SARO/NCA, ORS/DV/LDDAP-ADA/JEV bridge was established."
+        },
+        "physical": {
+          "status": "NOT_ESTABLISHED",
+          "note": "FMR Watch marks the project Completed, but the current evidence set does not independently establish physical completion."
+        },
+        "oversight": {
+          "status": "NOT_ESTABLISHED",
+          "note": "No project-specific independent audit/inspection/acceptance record was recovered."
+        },
+        "pip_ctrl_01g": {
+          "status": "INCONCLUSIVE / OUTCOME LINK NOT ESTABLISHED",
+          "chain": "implementation representation → physical accomplishment → inspection → completion/acceptance → payment → asset existence → measured outcome",
+          "result": "The administrative 'Completed' status is not enough to establish the full chain or a measured agricultural/logistics outcome."
+        }
+      }
+    },
+    {
+      "uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+      "frame_index": 6215,
+      "project": "Concreting of Barangay Cabasaran to Barangay Dao FMR, Gamay, Northern Samar",
+      "program_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+      "supplementary_trace": {
+        "budget": {
+          "status": "CONFIRMED",
+          "uacs": "310203206922000",
+          "amount": 12500000,
+          "fiscal_year": 2021,
+          "note": "DBM FY2021 NEP and FY2021 direct-release material identify the same project and amount."
+        },
+        "procurement": {
+          "status": "DOCUMENTED_SECONDARY/AGENCY-ORIGIN",
+          "primary_project_level_record": false,
+          "note": "A 2021 report states the project was under contract with A-Cube Construction and Supply. This is useful corroboration but is not being treated as a recovered primary PhilGEPS record."
+        },
+        "contract": {
+          "status": "DOCUMENTED_SECONDARY/AGENCY-ORIGIN",
+          "contractor": "A-Cube Construction and Supply",
+          "note": "The November 2021 report identifies the contractor and project engineer and says the project was already 43.60% accomplished as of 2021-10-31."
+        },
+        "financial_execution": {
+          "status": "UNRESOLVED",
+          "note": "No project-specific ORS/DV/payment chain was recovered in the controlled search."
+        },
+        "physical": {
+          "status": "DOCUMENTED_ADMINISTRATIVE_COMPLETION",
+          "note": "DPWH/PIO-origin reporting later described the project as completed and published photos; this is evidence of an agency-reported completion, not an independent physical verification dataset."
+        },
+        "oversight": {
+          "status": "NOT_ESTABLISHED",
+          "note": "No independent audit/acceptance record was recovered that could close the oversight relationship for the exact intervention."
+        },
+        "pip_ctrl_01g": {
+          "status": "PARTIAL / OUTCOME LINK NOT ESTABLISHED",
+          "implementation_evidence": [
+            "Construction reportedly began 2021-08-23.",
+            "Reported physical accomplishment was 43.60% as of 2021-10-31.",
+            "A later PIA report described the road as completed."
+          ],
+          "expected_outcome": "faster transport of farm/fish products, improved access to markets and services, local economic improvement",
+          "observed_outcome_measurement": "NOT FOUND",
+          "result": "Implementation evidence is stronger than for Candidate 1, but no quantified before/after travel-time, post-harvest-loss, farmgate-price, income, or comparable outcome measure was recovered."
+        }
+      }
+    }
+  ],
+  "adversarial_findings": [
+    "G4 score is not recalculated; frozen result remains 3/8 for both candidates.",
+    "New evidence may strengthen individual relationship dossiers without retroactively altering the pre-registered gate score.",
+    "No missing record is treated as proof that an event did not occur.",
+    "No contractor/project relationship is treated as evidence of wrongdoing.",
+    "PIP-CTRL-01G is a cross-cutting research test, not a new G4 gate.",
+    "For Candidate 2, historical procurement/implementation evidence is materially stronger, but exact primary procurement and financial execution joins remain unresolved."
+  ]
+}

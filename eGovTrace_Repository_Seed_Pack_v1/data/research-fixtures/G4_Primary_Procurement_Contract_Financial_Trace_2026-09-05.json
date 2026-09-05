@@ -1,0 +1,93 @@
+{
+  "workstream": "Controlled primary procurement → contract → obligation → payment trace",
+  "execution_timestamp_utc": "2026-09-05T03:07:07.875798+00:00",
+  "gate_boundary": {
+    "g4_status": "FROZEN",
+    "candidate_1_score": "3/8",
+    "candidate_2_score": "3/8",
+    "instruction": "Do not retroactively rescore G4 from supplementary evidence."
+  },
+  "candidate_1": {
+    "uuid": "5eff0b52-8f48-456b-9246-7e623533ea4e",
+    "frame_index": 3724,
+    "project": "Concreting of Purok 5 to Sitio Kaliloan, Brgy. Poblacion FMR, Brgy. Poblacion, Bunawan, Agusan del Sur",
+    "fmr_code": "2024-R13-ADS-INFRA-FMRDP-FMR-00329",
+    "budget": {
+      "status": "CONFIRMED",
+      "uacs": "310203211128000",
+      "amount_php": 10000000,
+      "sources": [
+        "FY2024 GAA",
+        "FY2024 DBM Summary of Funds for Direct Release to Implementing Agencies"
+      ]
+    },
+    "primary_procurement": {
+      "status": "NOT_ESTABLISHED",
+      "searched": [
+        "exact project title variants",
+        "UACS 310203211128000",
+        "PhilGEPS-indexed web results",
+        "DPWH-indexed web results"
+      ],
+      "result": "No defensible exact-project primary procurement notice/award/contract/NTP located."
+    },
+    "important_non_join": {
+      "status": "DOCUMENTED_OBSERVATION",
+      "detail": "A DPWH Agusan del Sur 2nd DEO PMR search result contains UACS 310203211128000.EAO, but the associated procurement entry is a P.O. for a Fire Alarm and Detection System for the DEO, not the selected FMR. It is therefore not evidence of the FMR's procurement execution."
+    },
+    "contract": "UNRESOLVED",
+    "obligation": "UNRESOLVED",
+    "payment": "UNRESOLVED",
+    "chain_disposition": "Budget identity confirmed; primary procurement → contract → obligation → payment chain not established."
+  },
+  "candidate_2": {
+    "uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+    "frame_index": 6215,
+    "project": "Concreting of Barangay Cabasaran to Barangay Dao FMR, Gamay, Northern Samar",
+    "fmr_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+    "budget": {
+      "status": "CONFIRMED",
+      "uacs": "310203206922000",
+      "amount_php": 12500000,
+      "sources": [
+        "FY2021 GAA",
+        "FY2021 DBM Summary of Funds for Direct Release to Implementing Agencies"
+      ]
+    },
+    "primary_procurement": {
+      "status": "NOT_ESTABLISHED",
+      "result": "No exact primary PhilGEPS procurement notice/award record located in the controlled web search."
+    },
+    "contract": {
+      "status": "DOCUMENTED_AGENCY_ORIGIN_SECONDARY",
+      "contractor": "A-Cube Construction and Supply",
+      "source": "Northern Samar 2nd DEO report reproduced in Leyte-Samar Daily Express, 23 Nov 2021",
+      "caveat": "Useful evidence that the project was under contract, but not treated as a recovered primary contract record."
+    },
+    "implementation": {
+      "status": "DOCUMENTED_AGENCY_ORIGIN",
+      "start_date": "2021-08-23",
+      "progress": "43.60% as of 2021-10-31",
+      "source": "Northern Samar 2nd DEO report"
+    },
+    "completion": {
+      "status": "DOCUMENTED_AGENCY_ORIGIN",
+      "source": "PIA report dated 2022-02-14",
+      "caveat": "Agency-reported completion is not independent physical verification."
+    },
+    "obligation": "UNRESOLVED",
+    "payment": "UNRESOLVED",
+    "chain_disposition": "Budget identity + agency-origin contract/implementation/completion evidence established; primary procurement and project-specific financial execution not established."
+  },
+  "temporal_lineage_observation_candidate_2": {
+    "status": "DOCUMENTED_OBSERVATION",
+    "detail": "The same Cabarasan–Dao corridor also appears in older DPWH records as a 2016 FMR project evaluated at a 9.173 million contract amount with CDU Construction. A separate 2024 listing identifies a Road Opening of Barangay Cabarasan–Dao Farm to Market Road Phase II. These are treated as separate interventions, not joined to the selected 2021 FMR absent project-level identity evidence.",
+    "why_important": "The ontology permits multiple interventions affecting the same physical road segment over time; route-name similarity alone is not sufficient identity proof."
+  },
+  "final_result": {
+    "candidate_1": "PRIMARY_CHAIN_NOT_ESTABLISHED",
+    "candidate_2": "PRIMARY_PROCUREMENT_NOT_ESTABLISHED; CONTRACT/IMPLEMENTATION DOCUMENTED VIA AGENCY-ORIGIN SECONDARY EVIDENCE; OBLIGATION/PAYMENT UNRESOLVED",
+    "g4_score_change": "NONE",
+    "g4_remains": "3/8 each"
+  }
+}

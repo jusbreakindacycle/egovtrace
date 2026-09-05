@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    {"path":"./packages/domain"},
+    {"path":"./packages/database"},
+    {"path":"./packages/graph"},
+    {"path":"./packages/detection"},
+    {"path":"./packages/evidence"},
+    {"path":"./packages/auth"},
+    {"path":"./apps/api"}
+  ]
+}

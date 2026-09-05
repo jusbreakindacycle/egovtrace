@@ -1,0 +1,133 @@
+{
+  "artifact": "eGovTrace_Case_A_Contractor_Project_Index_Triangulation_2026",
+  "research_stream": "Case A — Cabarasan to Dao FMR, Gamay, Northern Samar",
+  "execution_date": "2026-09-05",
+  "status": "PARTIAL / BRIDGE NOT RECOVERED",
+  "g4_rescore": false,
+  "foi_channel": {
+    "executed": true,
+    "response": "PENDING",
+    "used_as_evidence_in_this_branch": false
+  },
+  "case_identity": {
+    "fmr_uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+    "frame_index": 6215,
+    "fmr_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+    "title": "Concreting of Barangay Cabarasan to Barangay Dao FMR, Gamay, Northern Samar",
+    "uacs": "310203206922000",
+    "budget_amount_php": 12500000,
+    "implementing_office": "DPWH Northern Samar 2nd District Engineering Office",
+    "contractor_anchor": "A-CUBE CONSTRUCTION & SUPPLY"
+  },
+  "contractor_identity": {
+    "name_current_pcab": "A-CUBE CONSTRUCTION AND SUPPLY",
+    "historical_license_number": "40806",
+    "authorized_managing_officer": "Alvaro Sim Aguilana",
+    "region": "Region 8 (Eastern Visayas)",
+    "category": "D",
+    "identity_status": "DOCUMENTED REGULATORY IDENTITY",
+    "project_join_proof": false
+  },
+  "evidence": [
+    {
+      "type": "budget",
+      "status": "DOCUMENTED PRIMARY",
+      "description": "DBM FY2021 direct-release material identifies the Cabarasan to Dao FMR at UACS 310203206922000 and PHP 12.5M."
+    },
+    {
+      "type": "project_contractor",
+      "status": "DOCUMENTED AGENCY-ORIGIN SECONDARY",
+      "description": "Nov. 23, 2021 Leyte-Samar Daily Express report reproducing DPWH Northern Samar 2nd DEO information states the project was under contract with A-Cube Construction and Supply and began construction Aug. 23, 2021."
+    },
+    {
+      "type": "pcab_current",
+      "status": "DOCUMENTED PRIMARY / REGULATORY LISTING",
+      "description": "Current 2026 PCAB list contains A-CUBE CONSTRUCTION AND SUPPLY, Alvaro Sim Aguilana, Region 8, Category D."
+    },
+    {
+      "type": "pcab_historical",
+      "status": "DOCUMENTED REGULATORY SECONDARY / HISTORICAL INDEX",
+      "description": "Historical PCAB material lists license no. 40806 and A-CUBE CONSTRUCTION & SUPPLY with government-project validity extending to May 21, 2022 in the cited list."
+    },
+    {
+      "type": "bir_contractor_identity",
+      "status": "DOCUMENTED REGULATORY SECONDARY",
+      "description": "2023 BIR tax-clearance list includes AGUILANA, ALVARO SIM (A-CUBE CONSTRUCTION & SUPPLY)."
+    }
+  ],
+  "bridge_results": [
+    {
+      "from": "Project",
+      "to": "Contractor",
+      "candidate_bridge": "A-Cube Construction & Supply",
+      "join_type": "J3",
+      "status": "DOCUMENTED AGENCY-ORIGIN SECONDARY",
+      "accepted_as_project_identity": false
+    },
+    {
+      "from": "Contractor",
+      "to": "PCAB entity",
+      "candidate_bridge": "PCAB license 40806 / name / AMO",
+      "join_type": "J1/J2 at contractor-registry level",
+      "status": "DOCUMENTED",
+      "accepted_as_project_identity": false
+    },
+    {
+      "from": "Project",
+      "to": "Primary procurement",
+      "candidate_bridge": "title/code/location/contractor combinations",
+      "join_type": "J3 candidate",
+      "status": "NOT ESTABLISHED",
+      "accepted_as_project_identity": false
+    },
+    {
+      "from": "Project",
+      "to": "Contract",
+      "candidate_bridge": "contractor/title/location",
+      "join_type": "J5",
+      "status": "UNRESOLVED",
+      "accepted_as_project_identity": false
+    },
+    {
+      "from": "Project",
+      "to": "NTP",
+      "candidate_bridge": "title/location/contractor",
+      "join_type": "J3 candidate",
+      "status": "NOT ESTABLISHED",
+      "accepted_as_project_identity": false
+    }
+  ],
+  "false_join_tests": [
+    {
+      "id": "FJ-1",
+      "test": "same contractor",
+      "result": "REJECTED AS IDENTITY PROOF"
+    },
+    {
+      "id": "FJ-2",
+      "test": "same contractor + same municipality",
+      "result": "REJECTED AS IDENTITY PROOF"
+    },
+    {
+      "id": "FJ-3",
+      "test": "same route + different year",
+      "result": "NOT JOINED"
+    },
+    {
+      "id": "FJ-4",
+      "test": "same contractor + route + fiscal context without authoritative bridge",
+      "result": "NOT ESTABLISHED"
+    }
+  ],
+  "bottom_line": "Contractor-side triangulation strengthens the contractor entity node but does not recover the project-specific procurement, award, contract, or NTP identifier.",
+  "standing_rules": [
+    "CONNECTION ≠ CORRUPTION",
+    "NOT OBSERVED ≠ ABSENT",
+    "UNAVAILABLE ≠ FALSE",
+    "IDENTIFIER RECOVERY ≠ IDENTIFIER PROOF",
+    "SAME CONTRACTOR ≠ SAME PROJECT",
+    "SAME ROUTE ≠ SAME INTERVENTION",
+    "SAME MUNICIPALITY ≠ SAME PROJECT",
+    "SEARCH TIME ≠ EVIDENCE DATE"
+  ]
+}

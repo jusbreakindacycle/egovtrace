@@ -1,0 +1,86 @@
+{
+  "workstream": "G4 Controlled Deepening \u2014 Project-Specific Financial Execution & Identity-Continuity Trace",
+  "formal_gate_status": "G4 controlled deepening; not a new formal gate",
+  "execution_start_utc": "2026-09-05T04:03:20.635918Z",
+  "execution_end_utc": "2026-09-05T04:04:09.032Z",
+  "calendar_elapsed_seconds": 48.396,
+  "active_research_seconds": 48.396,
+  "time_band": "FAVORABLE",
+  "foi_status": "FOI IDENTIFIED AS NEXT-EVIDENCE CHANNEL; NOT EXECUTED",
+  "governing_frame": {
+    "frame_id": "FMR-FRAME-2026-09-03-859cc9bd480e",
+    "sha256": "859cc9bd480e3d219e9586d02e162889b5462553c40666fd2f10d49853fd4fc9",
+    "record_count": 6467
+  },
+  "identity_chain": [
+    "FMR UUID/FMR code",
+    "DPWH project identity",
+    "procurement reference",
+    "contract",
+    "UACS/PAP",
+    "SARO/allotment",
+    "ORS/obligation",
+    "DV/disbursement",
+    "LDDAP-ADA/ADA",
+    "JEV/accounting",
+    "settlement/payment"
+  ],
+  "candidate_1": {
+    "uuid": "5eff0b52-8f48-456b-9246-7e623533ea4e",
+    "frame_index": 3724,
+    "fmr_code": "2024-R13-ADS-INFRA-FMRDP-FMR-00329",
+    "project": "Concreting of Purok 5 to Sitio Kaliloan, Brgy. Poblacion FMR, Brgy. Poblacion, Bunawan, Agusan del Sur",
+    "amount_php": 10000000,
+    "links": {
+      "fmr_identity": "CONFIRMED",
+      "geography": "CONFIRMED",
+      "fy2024_budget": "CONFIRMED",
+      "uacs_310203211128000": "CONFIRMED",
+      "primary_procurement": "NOT ESTABLISHED",
+      "contract": "UNRESOLVED",
+      "saro_allotment": "UNRESOLVED",
+      "ors": "UNRESOLVED",
+      "dv": "UNRESOLVED",
+      "lddap_ada": "UNRESOLVED",
+      "jev": "UNRESOLVED",
+      "settlement": "NOT ESTABLISHED"
+    },
+    "name_variant": "DBM uses Kalilaan; FMR Watch uses Kaliloan",
+    "rejected_false_join": "310203211128000.EAO PMR item was a Fire Alarm and Detection System, not the selected FMR"
+  },
+  "candidate_2": {
+    "uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+    "frame_index": 6215,
+    "fmr_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+    "project": "Concreting of Barangay Cabarasan to Barangay Dao FMR, Gamay, Northern Samar",
+    "amount_php": 12500000,
+    "links": {
+      "fmr_identity": "CONFIRMED",
+      "geography": "CONFIRMED",
+      "fy2021_budget": "CONFIRMED",
+      "uacs_310203206922000": "CONFIRMED",
+      "primary_procurement": "NOT ESTABLISHED",
+      "contractor": "DOCUMENTED AGENCY-ORIGIN SECONDARY",
+      "contract": "DOCUMENTED AGENCY-ORIGIN SECONDARY",
+      "implementation": "DOCUMENTED AGENCY-ORIGIN SECONDARY",
+      "saro_allotment": "UNRESOLVED",
+      "ors": "UNRESOLVED",
+      "dv": "UNRESOLVED",
+      "lddap_ada": "UNRESOLVED",
+      "jev": "UNRESOLVED",
+      "settlement": "NOT ESTABLISHED"
+    },
+    "identifier_variation": "FY2021 NEP uses 310203206867000; FY2021 direct-release uses 310203206922000",
+    "contractor": "A-Cube Construction and Supply",
+    "implementation_start": "2021-08-23",
+    "reported_accomplishment_as_of": "2021-10-31",
+    "reported_accomplishment_percent": 43.6
+  },
+  "cross_candidate_result": {
+    "g4_baseline_candidate_1": "3/8",
+    "g4_baseline_candidate_2": "3/8",
+    "score_changed": false,
+    "structural_finding": "Defensible identity continuity currently reaches budget representation for both candidates, but downstream procurement/obligation/disbursement/accounting/settlement joins remain insufficiently evidenced from publicly recovered records."
+  },
+  "next_step": "Institutional source recovery: procurement identifier \u2192 contract \u2192 ORS \u2192 DV \u2192 LDDAP-ADA/ADA \u2192 JEV \u2192 settlement, with COA/DBM/implementing-office evidence and FOI as a separately logged acquisition channel."
+}

@@ -1,0 +1,151 @@
+{
+  "artifact": "eGovTrace_Cross_System_Bridge_Test_Case_A_Cabarasan_Dao_2026",
+  "study": "eGovTrace Identity & Interoperability Validation Study",
+  "status": "EXECUTED / CONTROLLED BRIDGE TEST — CASE A",
+  "case": {
+    "name": "Cabarasan to Dao FMR, Gamay, Northern Samar",
+    "fmr_uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+    "fmr_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+    "frame_index": 6215,
+    "amount_php": 12500000,
+    "fmr_status": "Completed"
+  },
+  "g4": {
+    "score_before": "3/8",
+    "score_after": "3/8",
+    "rescore": false,
+    "note": "Validation/deepening research only; no silent retroactive G4 rescore."
+  },
+  "core_rules": [
+    "IDENTIFIER RECOVERY ≠ IDENTIFIER PROOF",
+    "NOT OBSERVED ≠ ABSENT",
+    "ABSENT ≠ MISCONDUCT",
+    "UNAVAILABLE ≠ FALSE",
+    "SAME NAME ≠ SAME PROJECT",
+    "SAME ROUTE ≠ SAME INTERVENTION",
+    "SAME UACS ≠ SAME PROCUREMENT OBJECT",
+    "PAYMENT-INSTRUCTION EVIDENCE ≠ PAYMENT-SETTLEMENT EVIDENCE"
+  ],
+  "stage_results": [
+    {
+      "stage": "project_to_budget",
+      "status": "CONFIRMED",
+      "join_type": "J3",
+      "basis": ["title", "location", "amount", "program", "fiscal year"],
+      "evidence": ["DBM FY2021 GAA/FMR", "DBM FY2021 direct-release", "DBM FY2021 NEP"]
+    },
+    {
+      "stage": "project_to_primary_procurement",
+      "status": "NOT ESTABLISHED",
+      "join_type": null,
+      "basis_tested": ["FMR code", "title variants", "UACS", "location", "fiscal year", "contractor", "amount", "implementing office"],
+      "result": "No defensible exact primary procurement record recovered under the public research access conditions used in this pass."
+    },
+    {
+      "stage": "procurement_to_award",
+      "status": "UNRESOLVED",
+      "join_type": null,
+      "reason": "No exact primary procurement identifier established."
+    },
+    {
+      "stage": "award_to_primary_contract",
+      "status": "UNRESOLVED",
+      "join_type": null,
+      "reason": "No exact primary award/contract record established."
+    },
+    {
+      "stage": "project_to_contractor_secondary",
+      "status": "DOCUMENTED AGENCY-ORIGIN SECONDARY",
+      "join_type": "J4",
+      "contractor": "A-Cube Construction and Supply",
+      "basis": ["agency-origin public-information report reproduced by Leyte-Samar Daily Express", "project description", "2021 implementation context"],
+      "note": "Not promoted to primary contract proof."
+    },
+    {
+      "stage": "contract_to_uacs",
+      "status": "UNRESOLVED",
+      "join_type": null,
+      "reason": "Primary contract identifier not recovered."
+    },
+    {
+      "stage": "uacs_to_saro",
+      "status": "UNRESOLVED",
+      "join_type": null,
+      "reason": "No project-specific SARO recovered."
+    },
+    {
+      "stage": "saro_to_ors",
+      "status": "UNRESOLVED",
+      "join_type": null,
+      "reason": "No project-specific ORS recovered."
+    },
+    {
+      "stage": "ors_to_dv",
+      "status": "UNRESOLVED",
+      "join_type": null,
+      "reason": "No project-specific DV recovered."
+    },
+    {
+      "stage": "dv_to_lldap_ada_ada",
+      "status": "UNRESOLVED",
+      "join_type": null,
+      "reason": "No project-specific LDDAP-ADA/ADA recovered."
+    },
+    {
+      "stage": "ada_to_jev",
+      "status": "UNRESOLVED",
+      "join_type": null,
+      "reason": "No project-specific JEV recovered."
+    },
+    {
+      "stage": "jev_to_settlement",
+      "status": "NOT ESTABLISHED",
+      "join_type": null,
+      "reason": "No project-specific settlement evidence recovered. This is not a finding of non-payment."
+    }
+  ],
+  "false_join_tests": [
+    {
+      "test": "same_title",
+      "status": "PASS",
+      "disposition": "J5 / weak similarity only"
+    },
+    {
+      "test": "same_route",
+      "status": "PASS",
+      "disposition": "Other Cabarasan–Dao temporal records remain separate unless identity is independently established."
+    },
+    {
+      "test": "same_contractor",
+      "status": "PASS",
+      "disposition": "Contractor match alone not accepted as identity proof."
+    },
+    {
+      "test": "same_amount",
+      "status": "PASS",
+      "disposition": "₱12.5M alone is not unique enough for identity proof."
+    },
+    {
+      "test": "uacs_variation",
+      "status": "PASS",
+      "disposition": "FY2021 NEP and direct-release UACS variations retained as variation, not contradiction."
+    },
+    {
+      "test": "temporal_collision",
+      "status": "PASS",
+      "disposition": "2016 and 2024 Cabarasan–Dao records not merged with 2021 intervention."
+    }
+  ],
+  "critical_failure_localization": {
+    "first_material_unresolved_transition": "PROJECT -> PRIMARY PROCUREMENT",
+    "reason": "No defensible exact primary procurement identifier was recovered from public evidence in this pass.",
+    "downstream_effect": "Contract and financial execution could not be anchored to a primary procurement key."
+  },
+  "availability": {
+    "foi_identified": true,
+    "foi_executed": false,
+    "public_search_boundary_reached": true,
+    "authorized_internal_evidence_access": false
+  },
+  "next_action": "Institutional procurement-source recovery from the Northern Samar 2nd DEO / relevant DPWH procurement and accounting records, beginning with APP, procurement reference, award/NOA, contract number, NTP, then SARO/ORS/DV/LDDAP-ADA/JEV/settlement."
+}

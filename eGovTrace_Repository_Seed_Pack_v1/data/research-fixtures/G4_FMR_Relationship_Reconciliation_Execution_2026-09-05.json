@@ -1,0 +1,86 @@
+{
+  "gate": "G4 — Pre-Registered Evaluation / Relationship Reconciliation",
+  "research_track": "FMR Reconciliation Experiment",
+  "execution_timestamp_utc": "2026-09-05T03:02:05.521200+00:00",
+  "governing_frame": {
+    "frame_id": "FMR-FRAME-2026-09-03-859cc9bd480e",
+    "sha256": "859cc9bd480e3d219e9586d02e162889b5462553c40666fd2f10d49853fd4fc9",
+    "record_count": 6467
+  },
+  "candidates": [
+    {
+      "rank": 1,
+      "frame_index": 3724,
+      "uuid": "5eff0b52-8f48-456b-9246-7e623533ea4e",
+      "fmr_watch_representation": {
+        "name": "Concreting of Purok 5 to Sitio Kaliloan, Brgy. Poblacion FMR, Brgy. Poblacion, Bunawan, Agusan del Sur",
+        "program_code": "2024-R13-ADS-INFRA-FMRDP-FMR-00329",
+        "location": "Bunawan, Agusan del Sur",
+        "stated_amount": "₱10,000,000.00",
+        "status": "Completed"
+      },
+      "relationship_results": {
+        "R1_identity": "PASS",
+        "R2_administrative_geography": "PASS",
+        "R3_program_budget": "PASS",
+        "R4_procurement": "UNRESOLVED",
+        "R5_contract": "UNRESOLVED",
+        "R6_obligation_payment": "UNRESOLVED",
+        "R7_physical_inspection": "NOT_ESTABLISHED",
+        "R8_oversight_evidence": "NOT_ESTABLISHED"
+      },
+      "critical_pass_count": 3
+    },
+    {
+      "rank": 2,
+      "frame_index": 6215,
+      "uuid": "7afb3618-2c25-499f-8147-862d36c59ee4",
+      "fmr_watch_representation": {
+        "name": "Concreting of Barangay Cabasaran to Barangay Dao FMR, Gamay, Northern Samar",
+        "program_code": "2021-R8-NOS-INFRA-FMRDP-FMR-00547",
+        "location": "Gamay, Northern Samar",
+        "stated_amount": "₱12,500,000.00",
+        "status": "Completed"
+      },
+      "relationship_results": {
+        "R1_identity": "PASS",
+        "R2_administrative_geography": "PASS",
+        "R3_program_budget": "PASS",
+        "R4_procurement": "UNRESOLVED",
+        "R5_contract": "UNRESOLVED",
+        "R6_obligation_payment": "UNRESOLVED",
+        "R7_physical_inspection": "NOT_ESTABLISHED",
+        "R8_oversight_evidence": "NOT_ESTABLISHED"
+      },
+      "critical_pass_count": 3
+    }
+  ],
+  "threshold": {
+    "required_independent_relationships": 5,
+    "per_project_rule": true,
+    "time_band_rule": {
+      "favorable": "<= 4 h",
+      "constrained": ">4 h and <=8 h",
+      "adverse": ">8 h"
+    },
+    "time_measurement_status": "NOT_INSTRUMENTED_IN_THIS_EXECUTION",
+    "coverage_result": "FAIL — neither candidate reached the 5/8 relationship threshold"
+  },
+  "overall_disposition": "G4 PARTIAL / ADVERSE COVERAGE RESULT — relationship coverage is 3/8 for each candidate; continue as a documented reconciliation experiment, but do not call either project fully reconciled.",
+  "important_boundary": "Unresolved or not-established relationships are not treated as proof of absence, misconduct, or false reporting.",
+  "next_permitted_work": [
+    "Targeted procurement/contract tracing for each candidate using official PhilGEPS/agency procurement records.",
+    "Trace project-level obligation/payment representations where public or lawfully accessible.",
+    "Trace independent inspection/acceptance/physical evidence and audit/oversight records.",
+    "Run PIP-CTRL 01G implementation→outcome test where the evidence chain permits it; retain PIP-CTRL as cross-cutting research rather than an added G4 gate."
+  ],
+  "sources_consulted": [
+    "FMR Watch rendered-table reproduction",
+    "FMR Watch frozen frame",
+    "G3 candidate-selection execution record",
+    "G1 populated source registry / field-access matrix",
+    "G2 FMR-specific State Universe reference layer",
+    "DBM FY2024 GAA FMR annex",
+    "DBM FY2021 NEP Department of Agriculture"
+  ]
+}

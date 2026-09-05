@@ -1,0 +1,78 @@
+{
+  "artifact": "G3 Neutral Candidate Selection Execution Record",
+  "program": "eGovTrace / Philippine State Control & Assurance Research",
+  "research_track": "FMR Reconciliation Experiment",
+  "gate": "G3 — Neutral Candidate Selection",
+  "execution_status": "COMPLETE",
+  "selection_timestamp_utc": "2026-09-05T03:00:09.182Z",
+  "protocol_reference": "G3_Neutral_Candidate_Selection.md — FROZEN/APPROVED; this execution record updates only stale execution metadata (frame count) and records the draw.",
+  "frozen_frame": {
+    "frame_id": "FMR-FRAME-2026-09-03-859cc9bd480e",
+    "source": "https://fmrwatch.bafe.gov.ph/projects",
+    "portal_version_observed": "1.3.13",
+    "frozen_at": "2026-09-03T02:30:22.811Z",
+    "sha256": "859cc9bd480e3d219e9586d02e162889b5462553c40666fd2f10d49853fd4fc9",
+    "record_count": 6467,
+    "page_count": 647,
+    "page_size": 10,
+    "enumeration_method": "GET /projects?view=table&page=N via same-origin browser fetch; UUID extraction from returned project routes"
+  },
+  "eligibility_rule_version": "G3_Neutral_Candidate_Selection.md §4",
+  "exclusion_rule_version": "G3_Neutral_Candidate_Selection.md §6",
+  "eligibility_application": {
+    "input_frame_records": 6467,
+    "temporal_scope_imposed": false,
+    "duplicate_check": "PASS — frozen frame validation reports unique UUID population",
+    "pre_registered_exclusions_count": 2,
+    "pre_registered_exclusions": [
+      {
+        "uuid": "f73b2243-e804-46bf-92b4-428a92b476eb",
+        "reason": "New Casay / New Casayuran prior-research anchor",
+        "frame_index": 2882
+      },
+      {
+        "uuid": "a5920f1e-1f0f-4b10-a856-f0145cf931c2",
+        "reason": "Known Guinobatan / Lower Binogsacan ghost stress/reference case",
+        "frame_index": 6134
+      }
+    ],
+    "other_ineligibles_observed": 0,
+    "eligible_frame_count": 6465
+  },
+  "selection_method": {
+    "method": "deterministic random ordering using Python random.Random.shuffle with recorded seed",
+    "seed": "3776340df88faade07f3717164217e959fc390907696b8a48cee574f8fab79ae",
+    "seed_generation": "fresh cryptographic entropy generated immediately before draw; seed contains no project-level attributes",
+    "initial_order_basis": "frozen frame order (page, position_on_page), indexed 1..6467; fixed exclusions applied before shuffle",
+    "pre_registered_candidate_count": 2,
+    "replacement_events": [],
+    "randomized_pool_count": 6465
+  },
+  "selected_candidates": [
+    {
+      "selection_rank": 1,
+      "frame_index": 3724,
+      "uuid": "5eff0b52-8f48-456b-9246-7e623533ea4e"
+    },
+    {
+      "selection_rank": 2,
+      "frame_index": 6215,
+      "uuid": "7afb3618-2c25-499f-8147-862d36c59ee4"
+    }
+  ],
+  "selection_integrity": {
+    "outcome_bearing_variables_used": false,
+    "data_richness_used": false,
+    "research_difficulty_used": false,
+    "investigator_reordering": false,
+    "post_selection_information_used": false
+  },
+  "reproducibility": {
+    "eligible_uuid_sha256": "9988cf7ffd7d7b076b6cebf09e9cba48a5f9b5d49b80656cfe46249af55d8085",
+    "selected_uuid_sha256": "677e52276c383d2ee2240bf38c776392ec2f82434c3981e03fdc0660469930e7",
+    "random_algorithm": "Python random.Random(seed).shuffle",
+    "seed_encoding": "UTF-8 string passed directly to random.Random"
+  },
+  "post_selection_boundary": "Downstream procurement, budget, financial, physical, audit/legal, complaint, contractor, outcome, and research-value information was not used in selection and remains post-selection for G4.",
+  "disposition": "G3 COMPLETE — 2 candidates selected from the 6,465-record eligible pool after the 2 fixed prior-research exclusions. Advance to G4 without replacing or reordering candidates."
+}
