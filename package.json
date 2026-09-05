@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -b tsconfig.json",
     "typecheck": "tsc -b tsconfig.json --pretty false",
-    "test": "node --test tests/**/*.test.mjs",
+    "test": "npm run build && node --test \"tests/**/*.test.mjs\"",
     "lint": "node scripts/lint-placeholder.mjs",
     "dev:api": "node apps/api/src/server.mjs"
   },
