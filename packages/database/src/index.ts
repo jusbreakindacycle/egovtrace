@@ -1,5 +1,6 @@
 import { Pool, type PoolClient } from 'pg';
 import { createHash } from 'node:crypto';
+import { expectedControlPathMigrationSql } from './expected-control-path.js';
 
 export type DatabaseConfig = { connectionString?: string };
 export type EntityInput = { id?: string; entityType: string; payload: Record<string, unknown> };
@@ -27,6 +28,7 @@ export class PersistenceStore {
   async migrate(): Promise<void> {
     await this.pool.query(schemaSql);
     await this.pool.query(governmentEventLifecycleSql);
+    await this.pool.query(expectedControlPathMigrationSql);
   }
 
   async createProvenance(input: ProvenanceInput, client: PoolClient = this.pool as unknown as PoolClient): Promise<string> {

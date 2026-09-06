@@ -276,3 +276,5 @@ export function isExplicitlyConfirmedIdentity(assertion: RelationshipAssertion):
     && assertion.basis.includes('EXPLICIT_IDENTIFIER_REFERENCE')
     && assertion.basis.includes('DIRECT_SOURCE_REFERENCE');
 }
+
+export type * from './expected-control-path.js';
