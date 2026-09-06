@@ -1,0 +1,1 @@
+T007.1 is the domain-only reconciliation boundary and deliberately excludes persistence, detection, evidence assessment, accountability, connectors, and UI.
