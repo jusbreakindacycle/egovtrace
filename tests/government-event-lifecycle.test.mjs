@@ -88,7 +88,7 @@ integration('replaying the same source observation is idempotent', async () => {
   assert.equal((await store.query('SELECT count(*) AS count FROM outbox_record WHERE event_type = \'event.created\''))[0].count, '1');
 });
 
-integration('a new source revision creates a new event version with lineage', async () => {
+integration('a new source revision creates a new event version and supersedes the prior event', async () => {
   const base = {
     eventType: 'PROJECT_CREATED',
     occurredAt: '2026-09-05T08:00:00Z',
@@ -103,10 +103,10 @@ integration('a new source revision creates a new event version with lineage', as
   assert.equal(second.replayed, false);
   assert.equal(second.eventVersion, 2);
   assert.equal(second.supersededEventId, first.eventId);
-  const rows = await store.query('SELECT event_version, supersedes_event_id, source_revision FROM government_event WHERE source_identity_key = (SELECT source_identity_key FROM government_event WHERE id = $1) ORDER BY event_version', [second.eventId]);
+  const rows = await store.query('SELECT event_version, supersedes_event_id, source_revision, status FROM government_event WHERE source_identity_key = (SELECT source_identity_key FROM government_event WHERE id = $1) ORDER BY event_version', [second.eventId]);
   assert.deepEqual(rows, [
-    { event_version: 1, supersedes_event_id: null, source_revision: '1' },
-    { event_version: 2, supersedes_event_id: first.eventId, source_revision: '2' }
+    { event_version: 1, supersedes_event_id: null, source_revision: '1', status: 'SUPERSEDED' },
+    { event_version: 2, supersedes_event_id: first.eventId, source_revision: '2', status: 'RECORDED' }
   ]);
 });
 
@@ -136,8 +136,9 @@ integration('date-only precision is preserved without fabricated time', async ()
     objectEntityId,
     source: { sourceSystem: 'synthetic-source', sourceLocator: 'https://example.test/report/006', retrievedAt: '2026-09-06T00:00:00Z' }
   });
-  const [row] = await store.query('SELECT occurred_at::text AS occurred_at, temporal_precision FROM government_event WHERE id = $1', [result.eventId]);
-  assert.ok(row.occurred_at.startsWith('2026-09-05'));
+  const [row] = await store.query('SELECT occurred_at::text AS occurred_at, occurred_at_source_value, temporal_precision FROM government_event WHERE id = $1', [result.eventId]);
+  assert.equal(row.occurred_at, null);
+  assert.equal(row.occurred_at_source_value, '2026-09-05');
   assert.equal(row.temporal_precision, 'DATE');
   await assert.rejects(() => ingestGovernmentEvent(store, {
     eventType: 'IMPLEMENTATION_REPORTED',
