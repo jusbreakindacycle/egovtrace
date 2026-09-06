@@ -9,11 +9,12 @@ ALTER TABLE government_event
   ADD COLUMN IF NOT EXISTS event_version integer NOT NULL DEFAULT 1,
   ADD COLUMN IF NOT EXISTS supersedes_event_id uuid REFERENCES government_event(id),
   ADD COLUMN IF NOT EXISTS source_identity_key text,
-  ADD COLUMN IF NOT EXISTS source_revision text;
+  ADD COLUMN IF NOT EXISTS source_revision text NOT NULL DEFAULT 'UNVERSIONED',
+  ADD COLUMN IF NOT EXISTS occurred_at_source_value text;
 
 CREATE UNIQUE INDEX IF NOT EXISTS government_event_source_identity_revision_idx
   ON government_event(source_identity_key, source_revision)
-  WHERE source_identity_key IS NOT NULL AND source_revision IS NOT NULL;
+  WHERE source_identity_key IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS government_event_source_identity_idx
   ON government_event(source_identity_key)
