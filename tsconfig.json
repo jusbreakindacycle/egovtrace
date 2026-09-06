@@ -7,6 +7,7 @@
     {"path":"./packages/detection"},
     {"path":"./packages/evidence"},
     {"path":"./packages/auth"},
+    {"path":"./packages/application"},
     {"path":"./apps/api"}
   ]
 }
