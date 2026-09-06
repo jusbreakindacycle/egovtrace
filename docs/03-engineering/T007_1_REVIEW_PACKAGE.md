@@ -1,1 +1,0 @@
-T007.1 review package is intentionally represented by the implementation specification, domain module, and adversarial test suite. This marker file is temporary and should not remain in the final merge.
