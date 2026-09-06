@@ -1,1 +1,0 @@
-T007.1 implements the reconciliation domain model and deterministic matcher only. Persistence, connector availability states, detection, evidence assessment, and accountability remain later boundaries.
