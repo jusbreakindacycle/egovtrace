@@ -18,9 +18,7 @@ export class PersistenceStore {
 
   constructor(config: DatabaseConfig = {}) {
     const connectionString = config.connectionString ?? process.env.DATABASE_URL;
-    if (!connectionString) {
-      throw new Error('PersistenceStore requires an explicit connectionString or DATABASE_URL');
-    }
+    if (!connectionString) throw new Error('PersistenceStore requires an explicit connectionString or DATABASE_URL');
     this.pool = new Pool({ connectionString });
   }
 
@@ -28,6 +26,7 @@ export class PersistenceStore {
   async query<T extends Record<string, unknown> = Record<string, unknown>>(text: string, values?: unknown[]): Promise<T[]> { return (await this.pool.query(text, values)).rows as T[]; }
   async migrate(): Promise<void> {
     await this.pool.query(schemaSql);
+    await this.pool.query(governmentEventLifecycleSql);
   }
 
   async createProvenance(input: ProvenanceInput, client: PoolClient = this.pool as unknown as PoolClient): Promise<string> {
@@ -103,4 +102,21 @@ CREATE TABLE IF NOT EXISTS financial_state (id uuid PRIMARY KEY DEFAULT gen_rand
 CREATE TABLE IF NOT EXISTS government_event (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), entity_id uuid NOT NULL REFERENCES domain_entity(id), event_type text NOT NULL, occurred_at timestamptz NOT NULL, status text NOT NULL, assertion_kind text NOT NULL, confidence text NOT NULL, object_entity_id uuid NOT NULL REFERENCES domain_entity(id), provenance_id uuid NOT NULL REFERENCES provenance_record(id));
 CREATE TABLE IF NOT EXISTS idempotency_record (idempotency_key text NOT NULL, operation text NOT NULL, request_hash text NOT NULL, result jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY (idempotency_key, operation));
 CREATE TABLE IF NOT EXISTS outbox_record (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), event_type text NOT NULL, aggregate_type text NOT NULL, aggregate_id uuid NOT NULL, payload jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), published_at timestamptz);
-`;export const packageName = '@egovtrace/database';
+`;
+
+export const governmentEventLifecycleSql = `
+ALTER TABLE government_event ALTER COLUMN occurred_at DROP NOT NULL;
+ALTER TABLE government_event ADD COLUMN IF NOT EXISTS observation_at timestamptz;
+ALTER TABLE government_event ADD COLUMN IF NOT EXISTS source_recorded_at timestamptz;
+ALTER TABLE government_event ADD COLUMN IF NOT EXISTS temporal_precision text NOT NULL DEFAULT 'UNKNOWN';
+ALTER TABLE government_event ADD COLUMN IF NOT EXISTS observation_state text NOT NULL DEFAULT 'OBSERVED';
+ALTER TABLE government_event ADD COLUMN IF NOT EXISTS event_version integer NOT NULL DEFAULT 1;
+ALTER TABLE government_event ADD COLUMN IF NOT EXISTS supersedes_event_id uuid REFERENCES government_event(id);
+ALTER TABLE government_event ADD COLUMN IF NOT EXISTS source_identity_key text;
+ALTER TABLE government_event ADD COLUMN IF NOT EXISTS source_revision text NOT NULL DEFAULT 'UNVERSIONED';
+ALTER TABLE government_event ADD COLUMN IF NOT EXISTS occurred_at_source_value text;
+CREATE UNIQUE INDEX IF NOT EXISTS government_event_source_identity_revision_idx ON government_event(source_identity_key, source_revision) WHERE source_identity_key IS NOT NULL;
+CREATE INDEX IF NOT EXISTS government_event_source_identity_idx ON government_event(source_identity_key) WHERE source_identity_key IS NOT NULL;
+`;
+
+export const packageName = '@egovtrace/database';
