@@ -3,14 +3,25 @@
   "private": true,
   "version": "0.1.0",
   "description": "Government Control, Intelligence & Accountability System",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "tsc -b tsconfig.json",
     "typecheck": "tsc -b tsconfig.json --pretty false",
-    "test": "npm run build && node --test",
+    "test": "npm run build && node --test tests/domain.test.mjs tests/database.test.mjs",
     "lint": "node scripts/lint-placeholder.mjs",
     "dev:api": "node apps/api/src/server.mjs"
   },
-  "engines": {"node": ">=22"},
-  "devDependencies": {"typescript": "^5.8.3"}
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "pg": "^8.23.0"
+  }
 }
