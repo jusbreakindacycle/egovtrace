@@ -1,1 +1,0 @@
-T007.1 is the domain-only reconciliation boundary. It compares ExpectedControlPath steps with an explicit, already-materialized GovernmentEvent observation scope using deterministic criteria. Persistence, detection, verification, accountability, connectors, and UI remain outside this task.
