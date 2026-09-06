@@ -2,8 +2,6 @@
 
 **Status:** Proposed engineering specification for review  
 **Task:** T005 — ExpectedControlPath specification  
-**Product source of truth:** `docs/00-foundation/eGovTrace_Master_Product_Handoff.md`  
-**Engineering source of truth:** `docs/00-foundation/eGovTrace_Master_Engineering_Prompt.md`  
 **Architecture reference:** `docs/02-architecture/eGovTrace_Repository_and_Codebase_Architecture_v1.md`  
 **Requirements reference:** `REQUIREMENTS.md`  
 **Domain implementation baseline:** `main` through T004 GovernmentEvent lifecycle
@@ -37,10 +35,10 @@ This specification deliberately separates:
 
 ## 2. Repository-Grounded Baseline
 
-The current repository already contains the following relevant foundations:
+The current repository contains the following relevant foundations:
 
 1. `GovernmentEvent` is the canonical observed-event record.
-2. The domain includes typed entities for Institution, Office, Person, Official, Authority, LegalInstrument, Project, Budget, Procurement, Bidder, Contractor, Contract, Payment, Evidence, and GovernmentEvent.
+2. The domain contains typed entities for Institution, Office, Person, Official, Authority, LegalInstrument, Project, Budget, Procurement, Bidder, Contractor, Contract, Payment, Evidence, and GovernmentEvent.
 3. `GovernmentEventType` currently contains:
    - `PROJECT_CREATED`
    - `BUDGET_APPROVED`
@@ -51,10 +49,10 @@ The current repository already contains the following relevant foundations:
    - `PAYMENT_SETTLED`
    - `IMPLEMENTATION_REPORTED`
    - `VERIFICATION_RECORDED`
-4. The architecture explicitly defines the implementation order as `DOMAIN → DATA → EVENTS → CONTROL PATHS → RECONCILIATION → DETECTION → EVIDENCE → VERIFICATION → ACCOUNTABILITY → API → WEB → MOBILE → PUBLIC VIEW`.
-5. The repository requirements define the first prototype acceptance target as a reviewer being able to inspect expected and observed lifecycle information, followed later by reconciliation, explainable control signals, evidence, verification, accountability, outcome, and public projection.
+4. The live architecture document defines the implementation order as `DOMAIN → DATA → EVENTS → CONTROL PATHS → RECONCILIATION → DETECTION → EVIDENCE → VERIFICATION → ACCOUNTABILITY → API → WEB → MOBILE → PUBLIC VIEW`.
+5. `REQUIREMENTS.md` defines the first prototype acceptance target as a reviewer being able to inspect expected and observed lifecycle information, followed later by reconciliation, explainable control signals, evidence, verification, accountability, outcome, and public projection.
 
-`ExpectedControlPath` therefore sits between the already implemented observed-event layer and the later reconciliation layer. It must consume GovernmentEvent semantics without reimplementing them.
+`ExpectedControlPath` therefore sits between the already implemented observed-event layer and the later reconciliation layer. It consumes GovernmentEvent semantics without reimplementing them.
 
 ---
 
@@ -310,7 +308,7 @@ ACCOUNTABILITY
 OUTCOME
 ```
 
-These correspond to the repository architecture's declared control lifecycle while remaining generic enough for synthetic-first implementation.
+These correspond to the lifecycle categories already present in the live architecture and remain generic enough for synthetic-first implementation.
 
 ### 9.2 Requiredness
 
@@ -350,7 +348,7 @@ OPTIONAL_PREDECESSOR
 ALTERNATIVE_PREDECESSOR
 ```
 
-The T005 implementation must avoid arbitrary graph complexity. V1 only needs acyclic dependencies among steps in one version.
+V1 only needs acyclic dependencies among steps in one version. The implementation should avoid introducing arbitrary graph machinery here.
 
 ### 10.1 No cyclic paths
 
@@ -655,7 +653,7 @@ A step cannot declare contradictory timing constraints.
 
 ### VP-12 — Historical validity
 
-An active path version must have a coherent applicability/effective period where historical selection is required.
+A control-path version used for historical interpretation must have enough validity metadata to determine whether it applies.
 
 ### VP-13 — Authority classification
 
