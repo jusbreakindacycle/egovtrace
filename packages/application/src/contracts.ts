@@ -1,4 +1,5 @@
-import type { ExpectedControlPath, GovernmentEvent, ReconciliationObservationScope, ReconciliationPersistedRun, ReconciliationResult, ReconciliationRun, ReconciliationStepInput, DomainId } from '../../domain/dist/index.js';
+import type { ExpectedControlPath, GovernmentEvent, ReconciliationObservationScope, ReconciliationResult, ReconciliationStepInput, DomainId } from '../../domain/dist/index.js';
+import type { ReconciliationPersistedRun } from '../../database/dist/reconciliation.js';
 
 export interface ExpectedControlPathResolver {
   getExact(controlPathId: string, controlPathVersion: number): Promise<ExpectedControlPath | null>;
