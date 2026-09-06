@@ -278,3 +278,5 @@ export function isExplicitlyConfirmedIdentity(assertion: RelationshipAssertion):
 }
 
 export type * from './expected-control-path.js';
+export type * from './reconciliation.js';
+export { reconcile, governmentEventTypesForStep, isPotentiallyCompleted, statusImpliesObserved } from './reconciliation.js';
