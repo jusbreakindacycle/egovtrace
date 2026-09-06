@@ -1,10 +1,11 @@
 # eGovTrace — GovernmentEvent and Event Lifecycle Specification v1
 
-**Status:** Proposed engineering specification for review  
+**Status:** Revised proposed engineering specification for review  
 **Task:** T004 — GovernmentEvent operational specification  
 **Product source of truth:** `docs/00-foundation/eGovTrace_Master_Product_Handoff.md`  
 **Engineering source of truth:** `docs/00-foundation/eGovTrace_Master_Engineering_Prompt.md`  
 **Architecture reference:** `docs/02-architecture/eGovTrace_Repository_and_Codebase_Architecture_v1.md`  
+**API/event contract reference:** `specs/contracts/eGovTrace_API_and_Event_Contract_v1.md`  
 **Implementation baseline:** `main` through T003.2 PostgreSQL persistence
 
 ---
@@ -13,87 +14,95 @@
 
 This specification defines the operational meaning, structure, lifecycle, validation rules, provenance requirements, and persistence expectations for `GovernmentEvent` in eGovTrace V1.
 
-`GovernmentEvent` is the canonical normalized record of an observed, reported, derived, or otherwise explicitly classified government-relevant occurrence that can participate in control-path comparison, graph relationships, evidence tracing, verification, and accountability workflows.
-
-This document does **not** create a new product concept. It operationalizes the already approved event boundary so that the implementation can proceed consistently.
+`GovernmentEvent` is the canonical normalized representation of a government-relevant occurrence or source-backed observation that can participate in control-path comparison, relationship analysis, evidence tracing, verification, and later accountability workflows.
 
 The specification deliberately separates:
 
-- the **source observation** from the normalized eGovTrace event;
-- the **event** from the entity or object involved;
-- the **event status** from the conclusion about that event;
-- the **event provenance** from the event payload;
-- the **event occurrence time** from the time eGovTrace received or processed it;
-- the **event** from later reconciliation, detection, verification, or finding outcomes.
+- source observation from normalized event;
+- event identity from source-record identity;
+- real-world/source events from internal domain messages;
+- event occurrence time from observation, recording, and ingestion time;
+- event status from observation-result conditions;
+- event assertions from relationship assertions;
+- event lineage from source revisions and ingestion attempts;
+- event evidence/provenance from later analytical conclusions.
+
+This document does not create reconciliation, detection, case, accountability, public-disclosure, or AI product behavior.
 
 ---
 
-## 2. Scope
+## 2. Scope and Non-Goals
 
 ### 2.1 In scope
 
-V1 defines:
+T004 defines:
 
-1. the canonical `GovernmentEvent` boundary;
-2. minimum event fields and semantics;
-3. event categories and event-type conventions;
-4. lifecycle states from source observation through persistence;
-5. normalization and validation responsibilities;
-6. entity-resolution and relationship-linking behavior;
-7. provenance and evidence requirements;
-8. idempotent ingestion behavior;
-9. temporal semantics;
-10. handling of uncertainty and missing information;
-11. event correction and supersession behavior;
-12. read/write boundaries between domain, database, and future API layers;
-13. acceptance criteria and adversarial cases for implementation.
+1. the canonical GovernmentEvent boundary;
+2. canonical V1 event types;
+3. minimum event structure and semantics;
+4. source-observation capture;
+5. normalization;
+6. validation;
+7. identity/reference resolution boundaries;
+8. provenance and evidence linkage;
+9. temporal precision;
+10. idempotent ingestion;
+11. correction and supersession lineage;
+12. transactional persistence requirements;
+13. failure and retry behavior;
+14. security/classification expectations;
+15. acceptance and adversarial tests.
 
 ### 2.2 Explicitly out of scope
 
-This task does **not** implement:
+This task does not implement:
 
+- ExpectedControlPath;
 - reconciliation rules;
 - anomaly/detection rules;
-- legal findings;
+- legal or administrative findings;
 - case management;
 - accountability decisions;
-- AI-generated conclusions;
-- a graph database;
-- source-system replacement;
-- broad production connectors;
-- public disclosure policy.
+- graph traversal/storage beyond ordinary domain relationships;
+- production government connectors;
+- public disclosure policy;
+- AI-generated findings or accusations.
 
 Those capabilities consume GovernmentEvents later in the delivery sequence.
 
 ---
 
-## 3. Governing Principles
+## 3. Governing Semantics
 
-The implementation must preserve the following rules from the approved product and architecture direction.
+The following rules are mandatory.
 
-### 3.1 Connection is not corruption
+### 3.1 Source authority
 
-An event may connect a person, institution, contractor, project, payment, or other entity without implying misconduct.
+Source systems remain authoritative for the records they own. eGovTrace stores normalized representations, references, relationships, provenance, and workflow state; it does not replace the source system.
 
-### 3.2 Identifier recovery is not identifier proof
+### 3.2 Connection is not corruption
 
-A source identifier recovered through normalization, matching, or investigation is not automatically proof that two records represent the same real-world entity.
+An event or relationship may connect people, institutions, projects, contractors, payments, or other entities without implying misconduct.
 
-### 3.3 Not observed is not absent
+### 3.3 Identifier recovery is not identifier proof
 
-Failure to observe an event is not proof that the event did not occur.
+A recovered or matched identifier does not by itself prove that two source records represent the same real-world entity.
 
-### 3.4 Unavailable is not false
+### 3.4 Not observed is not absent
 
-Unavailable source information must not be converted into a negative factual assertion.
+A search or observation process that does not produce an event does not establish that the event did not occur.
 
-### 3.5 Event evidence is not legal conclusion
+### 3.5 Unavailable is not false
 
-Evidence attached to an event supports traceability. It does not by itself establish a legal finding.
+Inaccessible or unavailable source information must not become a negative fact.
 
-### 3.6 Payment states remain distinct
+### 3.6 Missing evidence is not proof of misconduct
 
-An event involving a financial transaction must not silently collapse:
+An evidence gap may create a control or review signal later. It does not establish wrongdoing.
+
+### 3.7 Financial states remain distinct
+
+The event model must preserve:
 
 ```text
 OBLIGATION
@@ -101,100 +110,123 @@ DISBURSEMENT
 SETTLEMENT
 ```
 
-into one generic “paid” state.
+A payment instruction, disbursement record, journal entry, or similar record must not automatically be represented as settlement.
 
-### 3.7 AI assistance is not authoritative fact
+### 3.8 Internal domain events are not GovernmentEvents
 
-AI may assist later with extraction, matching, summarization, or explanation, but AI output must remain explicitly classified and must not be stored as an authoritative fact without appropriate human/source grounding.
+A transactional-outbox message such as `event.created` or `evidence.registered` records an eGovTrace state change. It is not itself proof that a real-world government event occurred. The API/event contract explicitly requires this separation. fileciteturn123file3L346-L368
 
-### 3.8 Historical state matters
+### 3.9 AI output is not authoritative fact
 
-The event record must preserve the relevant time dimensions so that later investigations can reconstruct what was known, observed, or asserted at a particular time.
+AI may assist with extraction or candidate matching later, but an AI-generated suggestion must remain explicitly classified and must not silently become an authoritative event assertion.
 
 ---
 
-## 4. Conceptual Model
+## 4. Conceptual Flow
 
-The canonical ingestion path is:
+The canonical operational flow is:
 
 ```text
 Source Observation
-    ↓
-Capture / Ingestion
-    ↓
-Normalization
-    ↓
-Validation
-    ↓
-Entity Resolution / Linking
-    ↓
-GovernmentEvent
-    ↓
-Provenance + Evidence Association
-    ↓
-Persistence
-    ↓
-Relationship Linking
-    ↓
+        ↓
+Capture
+        ↓
+Normalize
+        ↓
+Validate
+        ↓
+Resolve / Link References
+        ↓
+Create GovernmentEvent
+        ↓
+Attach Provenance / Evidence
+        ↓
+Persist Transactionally
+        ↓
+Publish Internal Domain Message
+        ↓
 Downstream Consumers
-    ├── Expected-vs-Observed Comparison
-    ├── Detection
-    ├── Verification
-    ├── Accountability
-    └── Permitted Public Projection
+        ├── Expected-vs-Observed Comparison
+        ├── Detection
+        ├── Verification
+        ├── Accountability
+        └── Permitted Public Projection
 ```
 
-The event itself is the normalized operational unit. Source records remain authoritative in their originating systems.
+An internal domain message is downstream infrastructure. It is not a substitute for the GovernmentEvent itself.
 
 ---
 
-## 5. Event Identity
+## 5. Canonical Event Identity
 
-### 5.1 eGovTrace event identifier
+### 5.1 Domain identifier
 
-Every persisted `GovernmentEvent` must have a stable, system-generated domain identifier.
+Every persisted GovernmentEvent has a stable eGovTrace domain identifier.
 
-This identifier:
+The domain identifier:
 
-- is distinct from every source-system record identifier;
+- is distinct from source-system identifiers;
 - is opaque to business meaning;
-- must remain stable for the lifetime of the event lineage;
-- must not be reused for an unrelated event.
+- is never reused for an unrelated event;
+- remains stable through non-destructive lineage changes.
 
-### 5.2 Source identity
+### 5.2 Source observation identity
 
-An event may reference one or more source observations. Each source reference must preserve, where available:
+Each source-backed event must retain enough information to identify the source representation that caused the observation.
+
+A source identity should include, where available:
 
 - source system;
-- source record identifier;
+- native source record ID;
 - source record type;
-- source URI/location when permitted;
-- source version or revision when available;
-- retrieval/capture metadata;
-- provenance classification.
+- source URI or locator;
+- source revision/version;
+- retrieval/capture time;
+- access classification.
 
-### 5.3 Idempotency identity
+### 5.3 Records without native IDs
 
-The ingestion layer must support an idempotency key derived from a source event identity or another explicitly defined stable source fingerprint.
+A source without a native record identifier must not force the normalizer to invent a business identifier.
 
-The same observation replayed by the same source with the same source identity must not silently create duplicate GovernmentEvents.
+At least one stable alternative is required, such as:
 
-An implementation must not use approximate text similarity as the sole idempotency key.
+- canonical source locator;
+- immutable source URL plus relevant version metadata;
+- source-issued document/reference number;
+- content or representation hash bound to the capture;
+- connector-local immutable observation ID.
+
+The implementation must distinguish a generated capture identifier from a source-issued identifier.
+
+A locator or content hash can support idempotency and traceability; it does not prove real-world identity.
+
+### 5.4 Idempotency key
+
+Idempotency must be based on stable source-observation identity, not approximate text similarity.
+
+The idempotency record must retain enough information to determine whether a replay is:
+
+```text
+SAME OBSERVATION
+UPDATED SOURCE REPRESENTATION
+DIFFERENT OBSERVATION
+KEY COLLISION / INVALID REUSE
+```
 
 ---
 
-## 6. GovernmentEvent Structure
+## 6. Canonical GovernmentEvent Structure
 
-The implementation must preserve a typed structure equivalent to the following conceptual model.
+The normative conceptual structure is:
 
 ```text
 GovernmentEvent
 ├── id
 ├── eventType
-├── occurredAt
-├── observedAt
-├── recordedAt
-├── institutionRef
+├── occurredAt?
+├── observationAt
+├── sourceRecordedAt?
+├── institutionRef?
 ├── officeRef?
 ├── actorRef?
 ├── actorRole?
@@ -213,380 +245,225 @@ GovernmentEvent
 ├── sourceRefs[]
 ├── provenanceRefs[]
 ├── classification
-├── status
-├── confidence?
 ├── assertionKind
-├── payload
-├── createdAt
-├── updatedAt
+├── observationState
+├── confidence
+├── eventVersion
 ├── supersedesEventRef?
 ├── supersededByEventRef?
-└── metadata
+├── payload
+└── creation/update metadata
 ```
 
-The exact TypeScript property names may follow the existing domain implementation, but the semantics above are normative for V1.
+The existing TypeScript model may use its current property names, but the implementation must preserve these semantics. The current domain already has typed event fields for event type, occurrence time, source references, object, financial value, relationships, evidence, classification, status, assertion kind, confidence, and validity. fileciteturn128file0
 
-### 6.1 Required core fields
+### 6.1 Minimum event requirements
 
-At minimum, every GovernmentEvent must have:
+A persisted source-backed GovernmentEvent must have:
 
-- `id`;
-- `eventType`;
-- a time basis sufficient to place the event in sequence;
-- an explicit `status`;
-- an explicit `assertionKind`;
-- source/provenance linkage sufficient to explain where it came from, unless the event is intentionally created as a clearly classified derived system event;
+- a domain ID;
+- a canonical event type;
+- an observation time;
+- enough temporal information to place the event in a sequence, unless the source genuinely cannot provide it;
+- a source observation reference or explicitly classified non-source provenance;
+- explicit assertion semantics;
+- explicit observation/state semantics;
+- classification;
 - creation metadata.
 
-### 6.2 Event time dimensions
+### 6.2 Optionality
 
-Where information exists, preserve:
+Not every event has an actor, project, program, location, financial amount, authority, or legal basis.
 
-- `occurredAt`: when the underlying event occurred;
-- `observedAt`: when eGovTrace or an observer observed/retrieved the underlying event;
-- `recordedAt`: when the source system recorded it.
-
-These values are not interchangeable.
-
-If the source provides only a date rather than a timestamp, the implementation must preserve the available precision rather than inventing a precise timestamp.
-
-### 6.3 Actor and institutional context
-
-The event should identify, where known:
-
-- institution;
-- office;
-- actor/person;
-- actor role;
-- authority;
-- legal basis.
-
-Unknown values should remain unknown or unavailable rather than being fabricated.
-
-### 6.4 Subject and object
-
-Events may refer to one or more domain entities. Examples include:
-
-- a budget allocated to a project;
-- a procurement conducted by an office;
-- a contract awarded to a contractor;
-- a payment obligation/disbursement/settlement involving a contractor;
-- a verification performed for a project.
-
-The event must not require every possible relationship field to be populated.
-
-### 6.5 Financial context
-
-Where an event carries a financial amount, preserve:
-
-- amount;
-- currency;
-- financial lifecycle/state where applicable;
-- source basis;
-- temporal context.
-
-A source record saying that a payment instruction was issued must not be normalized as `SETTLEMENT` unless the source evidence supports settlement.
-
-### 6.6 Geographic context
-
-Geographic fields are contextual. Their absence does not invalidate an otherwise valid event unless a future control specifically requires geography.
-
-### 6.7 Payload
-
-The event may contain structured event-specific attributes. Payload extensions must not undermine the canonical semantics of the core fields.
-
-Event-specific fields should be typed and versionable where practical.
+The absence of an optional field must not be converted into a negative assertion.
 
 ---
 
-## 7. Event Types
+## 7. Canonical V1 Event Types
 
-V1 should remain intentionally narrow. Initial normalized event families are:
+The canonical V1 event vocabulary must align with the already implemented domain event type rather than introducing a second incompatible enum.
 
-| Event family | Purpose | Typical examples |
+The current domain defines:
+
+```text
+PROJECT_CREATED
+BUDGET_APPROVED
+PROCUREMENT_POSTED
+CONTRACT_AWARDED
+PAYMENT_OBLIGATED
+PAYMENT_DISBURSED
+PAYMENT_SETTLED
+IMPLEMENTATION_REPORTED
+VERIFICATION_RECORDED
+```
+
+These are therefore the initial canonical V1 GovernmentEvent types. fileciteturn128file0
+
+### 7.1 Family mapping
+
+| Canonical event type | Event family | Meaning |
 |---|---|---|
-| `BUDGET` | Financial authorization/allocation context | budget allocation, obligation record |
-| `PROCUREMENT` | Procurement lifecycle observation | posting, bid opening, award |
-| `CONTRACT` | Contract lifecycle observation | execution, amendment, termination |
-| `PAYMENT` | Financial lifecycle observation | obligation, disbursement, settlement evidence |
-| `PROJECT` | Project/implementation observation | project start, milestone, completion evidence |
-| `VERIFICATION` | Verification/inspection observation | site inspection, documentary verification |
-| `EVIDENCE` | Evidence capture/registration event | document capture, evidence intake |
+| `PROJECT_CREATED` | PROJECT | Source-backed creation/recognition of a project representation |
+| `BUDGET_APPROVED` | BUDGET | Source-backed budget approval/allocation observation |
+| `PROCUREMENT_POSTED` | PROCUREMENT | Procurement posting/solicitation observation |
+| `CONTRACT_AWARDED` | CONTRACT | Award/contract lifecycle observation as represented by source evidence |
+| `PAYMENT_OBLIGATED` | PAYMENT | Obligation-stage financial event |
+| `PAYMENT_DISBURSED` | PAYMENT | Disbursement-stage financial event |
+| `PAYMENT_SETTLED` | PAYMENT | Settlement-stage financial event, only where supported by evidence |
+| `IMPLEMENTATION_REPORTED` | PROJECT | Reported implementation/progress observation |
+| `VERIFICATION_RECORDED` | VERIFICATION | Recorded inspection/verification observation |
 
-Additional event types may be added only through an explicit specification/ADR update.
+### 7.2 Source vocabulary
 
-### 7.1 Event type versus payload subtype
+Source-specific event codes remain source metadata. They may map to one canonical event type while preserving the original source vocabulary.
 
-Use `eventType` for the stable top-level operational family. Use typed subtype fields inside the payload for narrower semantics where needed.
+Do not create a new top-level event type solely because a source uses different wording.
 
-Do not create dozens of top-level event types merely to encode source-system vocabulary.
+### 7.3 Adding event types
 
-### 7.2 Source vocabulary mapping
+A new GovernmentEvent type requires an explicit specification/ADR update and corresponding domain/test changes. It must not be added ad hoc inside a connector.
 
-Source-specific event codes remain source metadata. Normalization should map them into eGovTrace's canonical vocabulary while preserving the original source value.
+### 7.4 Evidence registration is not an event family
+
+Evidence is a first-class domain object. An `evidence.registered` internal domain message is not itself a real-world GovernmentEvent. This follows the API/event contract's distinction between internal messages and real-world/source events. fileciteturn122file6L967-L996
 
 ---
 
-## 8. Assertion and Status Semantics
+## 8. Assertion Semantics
 
-GovernmentEvent must not use one status field to represent every kind of uncertainty.
+GovernmentEvent must not use analytical classifications that belong to downstream objects.
 
-### 8.1 Assertion kind
+### 8.1 Allowed event assertion kinds
 
-The event should retain the semantic class of the assertion, including as applicable:
+For T004, GovernmentEvent assertion kind is limited to:
 
 ```text
 FACT
 OBSERVATION
-DERIVED_RELATIONSHIP
 CLAIM
-SIGNAL
-FINDING
 ```
 
-For ingestion of external records, `FACT` must be used carefully: it should refer to a fact asserted by a sufficiently authoritative source in the relevant context, not an unverified inference made by eGovTrace.
+`DERIVED_RELATIONSHIP`, `SIGNAL`, and `FINDING` remain separate analytical/relationship concepts. The existing domain's broader `AssertionKind` union may continue to serve other domain objects, but GovernmentEvent ingestion must not use `SIGNAL` or `FINDING` to represent an event.
 
-### 8.2 GovernmentEvent status
+### 8.2 Meaning
 
-Supported operational statuses include:
+- `FACT`: a source or competent authority explicitly asserts the relevant occurrence in its authoritative record context;
+- `OBSERVATION`: eGovTrace records an observed source representation without claiming more than the source supports;
+- `CLAIM`: a person/reporting process asserts the occurrence, but it remains unestablished.
+
+A GovernmentEvent with `CLAIM` assertion must not be rendered as an established government record merely because it is persisted.
+
+### 8.3 Derived representations
+
+A system may create a derived event representation only when it has explicit derivation provenance. It must not silently convert a derived relationship or analytical signal into an established source event.
+
+---
+
+## 9. Observation State versus Event State
+
+The previous review identified a critical distinction: `NOT_OBSERVED` and `UNAVAILABLE` describe observation conditions and must not be treated as if they were ordinary persisted real-world events.
+
+### 9.1 Event persistence state
+
+The current domain persistence state is:
+
+```text
+RECORDED
+SUPERSEDED
+```
+
+A corrected historical representation is superseded, not silently erased. fileciteturn128file0
+
+### 9.2 Observation outcome
+
+The ingestion pipeline must separately represent the observation condition for a requested source observation:
 
 ```text
 OBSERVED
 NOT_OBSERVED
-ABSENT
 UNAVAILABLE
-REPORTED
-DERIVED
-CONTESTED
+EXPLICITLY_ABSENT
+NOT_APPLICABLE
 ```
 
-Definitions:
+These outcomes belong to the observation/search/control context, not automatically to GovernmentEvent itself.
 
-- `OBSERVED`: an observation was obtained and accepted as an observed event representation;
-- `NOT_OBSERVED`: the relevant source/search/observation process did not produce evidence of the event within the defined observation scope;
-- `ABSENT`: the source or control context explicitly establishes absence;
-- `UNAVAILABLE`: the expected information could not be obtained or was not accessible;
-- `REPORTED`: a claim/report exists, but has not been established as an observed fact;
-- `DERIVED`: eGovTrace derived the event/relationship from other evidence or events;
-- `CONTESTED`: the event or assertion is disputed and the dispute is material to interpretation.
+### 9.3 Reported claim
 
-The implementation must not convert between these states implicitly.
+A citizen, human operator, or other claimant may create a claim-backed event representation with:
+
+```text
+assertionKind = CLAIM
+observation outcome = OBSERVED
+```
+
+Here `OBSERVED` means the claim was observed/received as a report. It does not mean the underlying real-world event was independently established.
+
+### 9.4 Important semantic distinction
+
+```text
+No event returned by source search
+        !=
+Source explicitly states that event is absent
+```
+
+The implementation must retain which condition occurred and the scope of the search/observation.
 
 ---
 
-## 9. Provenance and Evidence
+## 10. Temporal Semantics
 
-### 9.1 Provenance is mandatory for material events
+Time is multi-dimensional.
 
-Every persisted event that contributes to reconciliation, detection, verification, accountability, or public projection must be traceable to its source/provenance basis.
+### 10.1 Distinct timestamps
 
-### 9.2 Provenance categories
+Where available, preserve:
 
-The implementation must support the existing provenance model and distinguish, at minimum, provenance arising from:
+- `occurredAt`: when the underlying event is stated to have occurred;
+- `observationAt`: when eGovTrace observed, retrieved, or received the representation;
+- `sourceRecordedAt`: when the source says it recorded the event.
 
-- source records;
-- human observation/input;
-- system transformation;
-- derived relationships;
-- AI assistance when used.
+These timestamps must not be substituted for one another.
 
-### 9.3 Evidence references
+### 10.2 Temporal precision
 
-Evidence references must identify the evidence object without copying large source documents into the event record by default.
+The source's precision must be preserved.
 
-An event may have multiple evidence references.
-
-### 9.4 Material derivation
-
-If an event or relationship is derived from other events, the derivation must preserve enough provenance to answer:
+Supported conceptual precision includes:
 
 ```text
-What inputs produced this event?
-Who/what produced it?
-When was it produced?
-What transformation or rule was used?
-What uncertainty remains?
+YEAR
+MONTH
+DATE
+DATETIME
+INTERVAL
+UNKNOWN
 ```
 
-### 9.5 Provenance does not equal verification
+A date-only source must not become a fabricated midnight timestamp. Where the current TypeScript representation uses strings, the implementation must preserve the original precision through explicit metadata or a compatible temporal structure rather than guessing.
 
-A source reference shows origin. It does not automatically mean a human investigator verified the underlying claim.
+### 10.3 Contradictory times
+
+When source records contain contradictory timestamps:
+
+- preserve the source values;
+- preserve the source references that supplied them;
+- do not silently choose the most convenient timestamp;
+- retain the contradiction for later review/reconciliation.
+
+### 10.4 Sequence interpretation
+
+Chronological ordering for downstream controls must use the strongest supported temporal value and preserve uncertainty where exact ordering cannot safely be established.
 
 ---
 
-## 10. Event Lifecycle
+## 11. Entity and Reference Resolution
 
-The lifecycle is divided into operational stages.
+Identity resolution is a separate operation from event creation.
 
-### Stage 1 — Source observation
+### 11.1 Resolution outcomes
 
-A source system, human operator, external record, or approved integration exposes an observation.
-
-Output:
-
-```text
-SourceObservation
-```
-
-This may still use source-native structures.
-
-### Stage 2 — Capture
-
-The observation is received or recorded with ingestion metadata.
-
-Required characteristics:
-
-- source identity;
-- source record identity where available;
-- capture time;
-- connector/process identity;
-- raw/reference integrity metadata where feasible.
-
-### Stage 3 — Normalize
-
-Source vocabulary and shape are mapped to eGovTrace canonical semantics.
-
-Normalization must preserve source-native values rather than destroy them.
-
-### Stage 4 — Validate
-
-The normalized candidate is checked against structural and domain invariants.
-
-Examples:
-
-- required identifiers present;
-- timestamps valid and internally coherent where possible;
-- financial amount/currency coherent;
-- referenced entities use valid eGovTrace identifiers or explicit unresolved-reference structures;
-- status/assertion combinations allowed;
-- provenance requirements satisfied.
-
-### Stage 5 — Entity resolution / linking
-
-The system attempts to associate source references with eGovTrace entities.
-
-This process may yield:
-
-```text
-CONFIRMED LINK
-POSSIBLE LINK
-UNRESOLVED
-CONTESTED LINK
-```
-
-The event must not silently promote a possible link to a confirmed identity.
-
-### Stage 6 — GovernmentEvent creation
-
-A validated candidate becomes a canonical GovernmentEvent.
-
-The event receives:
-
-- stable domain ID;
-- canonical event type;
-- normalized fields;
-- status/assertion classification;
-- provenance/evidence references;
-- source references;
-- timestamps and metadata.
-
-### Stage 7 — Persist
-
-The event and its associated references are persisted transactionally according to the database boundary.
-
-If persistence fails, the ingestion operation must not report success as though the event were durable.
-
-### Stage 8 — Relationship linking
-
-Relationships to other events and entities may be attached when supported by source evidence, deterministic rules, or explicitly classified derivation.
-
-### Stage 9 — Downstream use
-
-Only persisted events are eligible for normal downstream workflows.
-
-Examples:
-
-```text
-GovernmentEvent
-    ↓
-ExpectedControlPath comparison
-    ↓
-ReconciliationResult
-    ↓
-DetectionSignal
-    ↓
-Case / Verification
-```
-
-GovernmentEvent itself does not perform those downstream decisions.
-
----
-
-## 11. Validation Rules
-
-### 11.1 Structural validity
-
-An event is invalid when required structural fields cannot be satisfied.
-
-### 11.2 Temporal validity
-
-The implementation must reject impossible internal temporal states where the source explicitly contradicts itself and no uncertainty field can correctly represent the ambiguity.
-
-Examples requiring review rather than silent correction:
-
-- amendment recorded before contract creation when source timestamps are authoritative;
-- settlement timestamp earlier than the asserted underlying obligation without supporting explanation;
-- event `occurredAt` with unsupported precision fabricated by the normalizer.
-
-### 11.3 Referential validity
-
-Referenced entities and events must either:
-
-- resolve to valid domain IDs;
-- remain explicit unresolved source references;
-- or be rejected when the relationship is mandatory for the event type.
-
-### 11.4 Financial validity
-
-The system must not infer settlement from a generic payment label.
-
-Financial state must follow evidence.
-
-### 11.5 Status validity
-
-Examples of invalid semantic coercion:
-
-```text
-UNAVAILABLE → ABSENT
-NOT_OBSERVED → ABSENT
-REPORTED → OBSERVED
-AI-generated suggestion → FACT
-POSSIBLE ENTITY MATCH → CONFIRMED ENTITY
-```
-
-These transitions require explicit evidence and/or a defined human/system action.
-
-### 11.6 Provenance validity
-
-An event intended for durable downstream use must retain an auditable provenance path.
-
-### 11.7 Duplicate validity
-
-Exact source-identity replay must be idempotent.
-
-Distinct source observations that happen to look similar must not be merged solely because their textual contents are similar.
-
----
-
-## 12. Entity Resolution Rules
-
-Entity resolution is a separate concern from event creation, even though the two may execute in one ingestion workflow.
-
-### 12.1 Confidence does not equal identity proof
-
-Confidence expresses the strength of a candidate association. It is not a legal or factual determination of identity.
-
-### 12.2 Supported resolution outcomes
+A reference may be:
 
 ```text
 CONFIRMED
@@ -595,380 +472,528 @@ UNRESOLVED
 CONTESTED
 ```
 
-### 12.3 Evidence basis
+### 11.2 Confirmation
 
-A confirmed relationship must be supported by an explicit evidentiary or authoritative basis appropriate to the relationship.
+A confirmed relationship requires an explicit evidentiary or authoritative basis appropriate to the relationship.
 
-### 12.4 Ambiguity preservation
+The existence of a high similarity score or a shared name is not sufficient by itself.
 
-When two possible people, offices, contractors, or projects cannot be safely distinguished, preserve the ambiguity.
+### 11.3 Event creation with unresolved references
 
-Do not select the most likely candidate merely to simplify downstream queries.
+A valid event may be persisted with an unresolved source reference when the event itself is otherwise sufficiently defined.
+
+This permits future resolution without blocking unrelated lifecycle observations.
+
+### 11.4 Identity confidence
+
+Identity-resolution confidence must remain conceptually distinct from event confidence.
+
+An implementation may reuse the existing `Confidence` type, but must not interpret event confidence as identity proof.
 
 ---
 
-## 13. Relationship Semantics
+## 12. Provenance and Evidence
 
-GovernmentEvent may reference other events, entities, evidence, and sources.
+### 12.1 Mandatory traceability
 
-Examples include:
+Every source-backed event intended for durable downstream use must preserve an auditable provenance path.
+
+The connector architecture requires source observations, provenance, identity/event reconciliation, and preservation of source authority. fileciteturn122file0L20-L55
+
+### 12.2 Provenance categories
+
+The implementation must distinguish at minimum:
 
 ```text
-EVENT A --PRECEDES--> EVENT B
-EVENT A --RELATES_TO--> EVENT B
-EVENT A --SUPPORTED_BY--> EVIDENCE
-EVENT A --REFERS_TO--> ENTITY
-EVENT A --DERIVED_FROM--> EVENT B
+SOURCE_OBSERVATION
+NORMALIZATION
+DERIVATION
+HUMAN_ADJUDICATION
+AI_ASSISTANCE
+SYNTHETIC_FIXTURE
 ```
 
-A relationship that materially affects an investigation must preserve its basis/provenance.
+These align with the existing domain provenance model. fileciteturn128file0
 
-The graph layer may later expose these relationships as typed edges. The GovernmentEvent specification does not require a separate graph store.
+### 12.3 Evidence references
+
+Evidence is referenced by identifier rather than copied wholesale into the event payload by default.
+
+An event may have multiple evidence references.
+
+### 12.4 Material derivation
+
+A derived relationship or derived event must preserve:
+
+```text
+inputs
+producer/process
+production time
+method/rule
+provenance chain
+remaining uncertainty
+```
+
+### 12.5 Provenance is not verification
+
+A source locator proves origin of a representation. It does not by itself prove that a human investigator independently verified the underlying real-world occurrence.
 
 ---
 
-## 14. Corrections, Updates, and Historical Lineage
+## 13. Event Lifecycle
 
-GovernmentEvents are historical control records. Important corrections must remain explainable.
+### Stage 1 — Source observation
 
-### 14.1 Do not erase historical meaning
+A source system, authorized operator, approved integration, or reporting process produces a representation.
 
-When a source record changes, the implementation must preserve enough lineage to determine:
+Output:
 
-- what was originally observed;
-- what changed;
-- when the change was observed;
-- which source/version caused the change;
-- what current representation supersedes the earlier one.
+```text
+SourceObservation
+```
 
-### 14.2 Supersession
+### Stage 2 — Capture
 
-Where appropriate, a corrected event may supersede an earlier event representation.
+The observation is captured with source identity, capture time, process identity, and integrity metadata where feasible.
+
+### Stage 3 — Normalize
+
+Source-specific fields and vocabulary are mapped to the canonical eGovTrace event structure.
+
+Normalization must preserve source-native values.
+
+### Stage 4 — Validate
+
+The candidate is checked for structural and semantic validity, including temporal coherence, financial-state consistency, permissible assertion kind, and provenance requirements.
+
+### Stage 5 — Resolve / link
+
+Entity and event references are resolved where possible. Ambiguity is preserved.
+
+### Stage 6 — Create GovernmentEvent
+
+The valid candidate receives its stable domain identity and canonical event type.
+
+### Stage 7 — Attach provenance and evidence
+
+Required source, provenance, and evidence references are associated with the event before downstream publication.
+
+### Stage 8 — Persist transactionally
+
+The event and mandatory metadata are persisted within the required transaction boundary.
+
+### Stage 9 — Emit internal domain message
+
+After durable persistence, the system may emit an internal event such as:
+
+```text
+event.created
+```
+
+through the transactional outbox. This message is an eGovTrace implementation event, not a second GovernmentEvent representing the real-world occurrence. fileciteturn122file6L967-L996
+
+### Stage 10 — Downstream use
+
+Only durable GovernmentEvents are eligible for normal downstream control workflows.
+
+---
+
+## 14. Validation Rules
+
+### 14.1 Structural validity
+
+Reject a candidate when mandatory structural requirements cannot be satisfied.
+
+### 14.2 Event-type validity
+
+A connector may not invent a new canonical event type inside its own mapping logic.
+
+### 14.3 Financial validity
+
+The event type and financial state must agree.
+
+For example:
+
+```text
+PAYMENT_OBLIGATED → OBLIGATION
+PAYMENT_DISBURSED → DISBURSEMENT
+PAYMENT_SETTLED → SETTLEMENT
+```
+
+No transition may be inferred solely from a generic source label such as “payment.”
+
+### 14.4 Assertion validity
+
+The following are prohibited without explicit transformation/adjudication semantics:
+
+```text
+AI suggestion → FACT
+CLAIM → established FACT
+SIGNAL → GovernmentEvent FACT
+FINDING → GovernmentEvent FACT
+```
+
+### 14.5 Referential validity
+
+References must either resolve, remain explicit unresolved references, or cause rejection where the event type makes the reference structurally mandatory.
+
+### 14.6 Temporal validity
+
+Reject or quarantine impossible internal combinations only when the ambiguity cannot be represented safely. Otherwise preserve the original values and flag the contradiction for later review.
+
+### 14.7 Source preservation
+
+Normalization must never discard the source-native identifier, source vocabulary, or relevant source locator when those values are available and lawfully retained.
+
+---
+
+## 15. Corrections, Versions, and Historical Lineage
+
+Three concepts must remain distinct:
+
+```text
+SOURCE REVISION
+INGESTION ATTEMPT
+EGOVTRACE EVENT LINEAGE / VERSION
+```
+
+### 15.1 Source revision
+
+A source may revise a record. The later observation must identify the relevant source revision/version when available.
+
+### 15.2 Ingestion attempt
+
+A retry or duplicate delivery is not automatically a new event version.
+
+### 15.3 Event version
+
+A material correction to the normalized representation creates a new event version or successor representation while preserving lineage.
 
 Conceptually:
 
 ```text
-Event v1
-   ↓ superseded by
-Event v2
+GovernmentEvent v1
+      ↓ superseded by
+GovernmentEvent v2
 ```
 
-This is preferable to destructive rewriting when the change is material to auditability.
+### 15.4 Supersession
 
-### 14.3 Source correction versus eGovTrace correction
+The implementation must be able to identify:
 
-The source of authority may correct its record. eGovTrace should record that source change through a new observation/update lineage rather than pretending the historical eGovTrace observation never existed.
+- what earlier representation was superseded;
+- what source observation caused the change;
+- when the change was observed;
+- what representation is current.
+
+The current domain already models `SUPERSEDED` as a GovernmentEvent lifecycle state; T004 implementation must add explicit lineage semantics rather than using destructive rewriting. fileciteturn128file0
+
+### 15.5 No retroactive erasure
+
+An earlier observation must not disappear merely because a source later corrected itself.
 
 ---
 
-## 15. Unavailable and Missing Data
+## 16. Transactional Persistence Contract
 
-The ingestion model must distinguish among:
+T003.2 established PostgreSQL, typed persistence, transactions, idempotency, optimistic concurrency, and transactional outbox metadata as the V1 persistence foundation.
+
+T004 must use those capabilities rather than inventing a second persistence mechanism.
+
+### 16.1 Minimum atomic unit
+
+Where the operation creates a durable source-backed event, the transaction must coordinate:
 
 ```text
-UNKNOWN
-UNAVAILABLE
-NOT_OBSERVED
-NOT_APPLICABLE
-EXPLICITLY_ABSENT
+GovernmentEvent
++ mandatory source reference(s)
++ mandatory provenance reference(s)
++ mandatory evidence links, if required by the event contract
++ idempotency record
++ outbox record
 ```
 
-Only the states actually supported by the evidence should be emitted.
+The exact table-level implementation remains a database concern, but no downstream consumer may observe a successful event creation that has permanently lost its mandatory provenance or idempotency record.
 
-Missing fields should not automatically block persistence unless the field is structurally or semantically required for that event type.
+### 16.2 Rollback
 
-This matters because later reconciliation must be able to tell the difference between:
+If any mandatory operation fails:
 
 ```text
-No evidence found
-vs.
-Evidence inaccessible
-vs.
-Evidence explicitly says no
+ROLLBACK
+→ no false success
 ```
 
----
+A retry must be safe through the same idempotency contract.
 
-## 16. Derived and System-Generated Events
+### 16.3 Concurrency
 
-Not every event must originate directly from a government source record.
+Concurrent updates to the same event lineage must use the optimistic concurrency/version mechanism established by the persistence layer.
 
-A system-generated event is permitted when it is explicitly classified as derived and has provenance linking it to its inputs.
-
-Examples might include:
-
-- a normalized relationship event;
-- an ingestion observation event;
-- a system-generated reconciliation-support event.
-
-However, derived events must not masquerade as source facts.
-
-A future implementation should avoid generating system events solely to make timelines appear complete.
+No silent last-write-wins behavior is permitted for material historical corrections.
 
 ---
 
-## 17. Transactional Persistence Requirements
+## 17. Idempotency and Retry Behavior
 
-The PostgreSQL persistence boundary established in T003.2 must provide the durability guarantees needed by this specification.
+The existing API/event contract establishes retryable mutation idempotency semantics: same key plus same semantic payload returns the original result; same key plus different semantic payload is a key-reuse conflict. fileciteturn122file6L894-L933
 
-At minimum, creation of a GovernmentEvent and its required source/provenance/evidence references should be coordinated so that downstream readers cannot observe a permanently persisted event that lacks mandatory supporting metadata.
+T004 applies the same principle to source observation ingestion.
 
-Where multiple database operations are required, use one transaction where atomicity is required.
-
-The ingestion flow must support safe retry behavior.
-
-A failed transaction must not create a false appearance of successful event ingestion.
-
----
-
-## 18. Read Model Expectations
-
-The event persistence shape is not automatically the API shape.
-
-Future API consumers should receive read models appropriate to their use case, such as:
+### 17.1 Required behavior
 
 ```text
-EventSummary
-EventDetail
-EventTimelineItem
-EventEvidenceBundle
-EventRelationshipView
+same source observation + retry
+→ same logical event lineage
+
+same source observation + network retry
+→ no duplicate event
+
+different source records + similar content
+→ remain distinct unless an explicit resolution process links them
+
+same source identity + materially changed source revision
+→ new observation/version lineage, not duplicate ingestion
 ```
 
-The API layer must not expose sensitive source material merely because it is reachable from the database.
+### 17.2 Failure retries
+
+Retries must not duplicate:
+
+- GovernmentEvents;
+- evidence links;
+- provenance records;
+- domain outbox messages representing the same mutation.
+
+---
+
+## 18. Failure Handling
+
+### 18.1 Capture failure
+
+The observation remains unaccepted; no durable GovernmentEvent success is reported.
+
+### 18.2 Normalization failure
+
+Quarantine or reject the candidate. Do not guess missing values merely to create an event.
+
+### 18.3 Validation failure
+
+Return structured validation failure information identifying the violated invariant.
+
+### 18.4 Resolution uncertainty
+
+Persist a valid event with unresolved references where permitted. Do not manufacture confirmed identities.
+
+### 18.5 Provenance failure
+
+A source-backed event missing mandatory provenance must not become downstream-ready until provenance is repaired or the event is explicitly classified as non-source/derived under a valid policy.
+
+### 18.6 Source unavailable
+
+Record the observation condition as `UNAVAILABLE` in the observation/search context. Do not emit a false `ABSENT` GovernmentEvent.
+
+### 18.7 Source search returned no result
+
+Record `NOT_OBSERVED` for the defined search scope. Do not create a synthetic `ABSENT` event unless the source explicitly establishes absence.
+
+### 18.8 Database failure
+
+Rollback and retry through the idempotent path. Do not emit success before durable commit.
 
 ---
 
 ## 19. Security and Classification
 
-GovernmentEvents may carry sensitive operational information. Classification must be explicit.
+GovernmentEvents may expose sensitive operational information.
 
-At minimum, the implementation must provide a path for:
+The event lifecycle must provide explicit paths for:
 
-- data classification;
+- classification;
 - source sensitivity;
 - authorization-aware retrieval;
-- audit logging for sensitive access.
+- sensitive-access audit logging.
 
-Event ingestion must not bypass authorization because the source connector is technically able to retrieve the information.
+Technical connector access does not itself grant authority to ingest, retain, or expose restricted information. The source connector architecture expressly requires lawful access, data classification, public/restricted separation, and purpose limitation. fileciteturn123file0L78-L96
 
----
-
-## 20. Failure Handling
-
-Failures must be explicit and diagnosable.
-
-### 20.1 Normalization failure
-
-If source data cannot be safely normalized:
-
-```text
-RECEIVED
-→ REJECTED / QUARANTINED
-```
-
-Do not create a misleading event with guessed values.
-
-### 20.2 Validation failure
-
-Return structured validation errors that identify the failed invariant.
-
-### 20.3 Entity-resolution uncertainty
-
-Persist the event with unresolved references where the event itself is sufficiently valid, rather than blocking unrelated future work.
-
-### 20.4 Persistence failure
-
-Treat the operation as failed and retry through the defined idempotent path.
-
-### 20.5 Provenance failure
-
-If required provenance cannot be established, the event should not be promoted to a normal downstream-ready state.
-
-### 20.6 Source unavailability
-
-Record source unavailability as an observation condition rather than as evidence that the underlying event is absent.
+Public projections must remain separate from the internal assurance representation.
 
 ---
 
-## 21. Concurrency and Retry Semantics
+## 20. Observability
 
-The implementation must be safe under at-least-once delivery assumptions.
-
-Two identical deliveries of one source observation must converge on one logical GovernmentEvent lineage.
-
-Concurrent updates must honor the optimistic concurrency mechanism established in the database boundary.
-
-A retried request must not accidentally:
-
-- duplicate payments;
-- duplicate contracts;
-- duplicate evidence references;
-- duplicate event records;
-- advance a historical event to an incorrect later state.
-
----
-
-## 22. Observability Requirements
-
-The event lifecycle implementation should emit operational telemetry sufficient to diagnose failures without exposing sensitive payloads unnecessarily.
+The event lifecycle should expose operational telemetry sufficient to diagnose ingestion behavior without unnecessarily replicating sensitive source payloads.
 
 Recommended dimensions:
 
 - source system;
 - connector/process;
-- event family;
+- canonical event type;
 - lifecycle stage;
-- result (`accepted`, `rejected`, `quarantined`, `duplicate`, `failed`);
+- result;
 - latency;
 - validation error class;
-- idempotency outcome.
+- idempotency outcome;
+- persistence outcome;
+- correlation ID where available.
 
-Logs must not include secrets or unnecessarily replicate sensitive source payloads.
+Logs must not contain secrets or unnecessary sensitive payload content.
 
 ---
 
-## 23. Initial Implementation Boundary
+## 21. Implementation Boundary After T004 Approval
 
-The next implementation task after approval of this specification should implement only the GovernmentEvent operational layer.
+### 21.1 Allowed
 
-### 23.1 Allowed scope
+- reconcile/harden the existing GovernmentEvent domain type;
+- add event lifecycle commands/use cases;
+- add source-observation input structures;
+- add persistence methods needed for event creation and lineage;
+- add idempotency handling;
+- add source/provenance/evidence linkage;
+- add deterministic validation;
+- add unit/integration tests;
+- add small synthetic fixtures.
 
-- harden/extend existing domain GovernmentEvent semantics;
-- define event lifecycle commands/use cases;
-- add persistence methods required for event records;
-- add source/provenance/evidence linkage needed for event persistence;
-- add idempotent ingestion behavior;
-- add focused unit/integration tests;
-- add minimal demo fixtures if required for tests.
+### 21.2 Forbidden
 
-### 23.2 Forbidden scope
+Do not include in T004 implementation:
 
-Do not include in the same task:
-
+- ExpectedControlPath implementation;
 - reconciliation engine;
 - detection rules;
-- graph traversal engine;
-- case management UI;
+- case workflow;
+- graph engine;
+- government UI;
 - public UI;
-- authentication productization;
-- broad external connectors;
-- AI features;
-- unrelated schema refactors.
+- production connector rollout;
+- AI reasoning features;
+- unrelated schema redesign.
 
-Scope creep must require a separate task/specification.
-
----
-
-## 24. Acceptance Criteria
-
-The GovernmentEvent implementation is acceptable only if all of the following are demonstrable.
-
-### AC-01 — Canonical event creation
-
-A valid normalized source observation can be converted into a persisted GovernmentEvent with a stable domain ID.
-
-### AC-02 — Source traceability
-
-A reviewer can identify which source system and source record produced the event, where such information exists.
-
-### AC-03 — Temporal distinction
-
-The implementation preserves occurrence/observation/recording time distinctions when available.
-
-### AC-04 — Status semantics
-
-`UNAVAILABLE`, `NOT_OBSERVED`, `ABSENT`, and `REPORTED` remain distinct.
-
-### AC-05 — Assertion semantics
-
-Fact, observation, claim, signal, finding, and derived relationship classifications are not collapsed.
-
-### AC-06 — Financial-state separation
-
-Obligation, disbursement, and settlement are not inferred as equivalent.
-
-### AC-07 — Entity ambiguity preservation
-
-An unresolved or contested identity association is representable without forcing a confirmed identity.
-
-### AC-08 — Provenance
-
-Material events retain sufficient provenance/evidence references for later explanation.
-
-### AC-09 — Idempotency
-
-Retrying the same source observation does not create a duplicate logical event.
-
-### AC-10 — Historical lineage
-
-A material source correction can be represented without destroying the prior observation lineage.
-
-### AC-11 — Transactional durability
-
-A failed event transaction does not leave a misleading partially persisted downstream-ready record.
-
-### AC-12 — Deterministic behavior
-
-Identical inputs produce identical canonicalization outcomes under the same mapping/version configuration.
-
-### AC-13 — No hidden conclusions
-
-Event ingestion does not create legal findings, corruption conclusions, or accusations.
-
-### AC-14 — Tests
-
-Automated tests cover normal creation, duplicate delivery, missing source information, unresolved identity, financial-state distinctions, temporal validity, provenance failure, and persistence rollback.
+Any scope expansion requires a separate specification or explicit task change.
 
 ---
 
-## 25. Adversarial Test Matrix
+## 22. Acceptance Criteria
 
-The implementation must explicitly challenge the following cases.
+### AC-01 — Canonical creation
+
+A valid normalized observation becomes one durable GovernmentEvent with a stable domain ID.
+
+### AC-02 — Existing domain alignment
+
+The implementation uses one canonical event-type vocabulary and does not introduce a second incompatible GovernmentEvent enum.
+
+### AC-03 — Source traceability
+
+A reviewer can identify the source system and source representation that produced a source-backed event.
+
+### AC-04 — Observation-state separation
+
+`NOT_OBSERVED`, `UNAVAILABLE`, `EXPLICITLY_ABSENT`, and a persisted GovernmentEvent are represented distinctly.
+
+### AC-05 — Assertion separation
+
+GovernmentEvent ingestion does not use `SIGNAL` or `FINDING` as event assertions.
+
+### AC-06 — Temporal precision
+
+Source date-only and timestamp values remain distinguishable; unsupported precision is never fabricated.
+
+### AC-07 — Financial-state separation
+
+Obligation, disbursement, and settlement remain distinct.
+
+### AC-08 — Identity ambiguity
+
+Candidate/unresolved identity links remain distinguishable from confirmed links.
+
+### AC-09 — Provenance
+
+Material source-backed events retain source/provenance references sufficient for later explanation.
+
+### AC-10 — Idempotency
+
+Retrying one source observation does not create a duplicate logical event lineage.
+
+### AC-11 — Revision lineage
+
+A material source correction can be represented without deleting the earlier observation lineage.
+
+### AC-12 — Transactional durability
+
+A failed transaction does not produce a false successful ingestion or a permanently downstream-ready partial event.
+
+### AC-13 — Internal versus real-world event separation
+
+`event.created` and other transactional-outbox messages cannot be mistaken for GovernmentEvents representing real-world occurrences.
+
+### AC-14 — Determinism
+
+Identical source observations under the same mapping/version configuration produce identical canonicalization outcomes.
+
+### AC-15 — No hidden conclusion
+
+Event ingestion never creates a corruption finding, legal conclusion, or automatic accusation.
+
+### AC-16 — Tests
+
+Tests cover normal creation, duplicate delivery, changed source revision, missing source identity, no-result search, unavailable source, explicit absence, unresolved identity, payment-state distinctions, temporal precision, provenance failure, rollback, and internal-event/real-world-event separation.
+
+---
+
+## 23. Adversarial Test Matrix
 
 | Case | Expected behavior |
 |---|---|
-| Same source record received twice | One logical event; second delivery is idempotent |
-| Two different records with identical text | Do not merge solely on textual similarity |
-| Missing source record ID | Allow only when another stable source identity exists or classify as non-idempotent input requiring explicit handling |
-| Source unavailable | Preserve `UNAVAILABLE`; do not mark `ABSENT` |
-| Search returned no result | Preserve `NOT_OBSERVED`; do not infer `ABSENT` |
-| Source explicitly says no event occurred | `ABSENT` may be used when that explicit assertion is authoritative for the scope |
-| Human reports an event | `REPORTED` until sufficiently established |
-| AI extracts likely contractor | Candidate/assisted resolution; not automatic identity proof |
-| Payment instruction exists | Do not mark settlement without supporting evidence |
-| Settlement evidence exists | `SETTLEMENT` may be represented if supported by source/evidence |
-| Event timestamp lacks time-of-day | Preserve source precision; do not invent a time |
-| Conflicting source timestamps | Preserve source values; flag/retain conflict for later review |
-| Source correction arrives | Preserve lineage; represent supersession/update |
-| Provenance missing | Reject/quarantine or keep non-downstream state according to explicit policy; never silently pass as authoritative |
-| Database transaction rolls back | No false success; retry safely |
-| Possible person match | Preserve candidate/ambiguity; do not confirm silently |
-| Event has no project | Allow unless project is semantically mandatory for its event type |
-| Event participates in relationship | Relationship basis/provenance remains available |
+| Same source record received twice | One logical event lineage; second delivery is idempotent |
+| Same source record with new source revision | New observation/version lineage; prior lineage preserved |
+| Two different records with identical text | Do not merge solely on text similarity |
+| Source has no native record ID | Require another stable observation identity or explicit non-idempotent handling |
+| Connector cannot access source | Observation context is `UNAVAILABLE`; never infer `ABSENT` |
+| Search yields no result | Observation context is `NOT_OBSERVED`; not an absence fact |
+| Source explicitly states no event occurred | `EXPLICITLY_ABSENT` may be represented when authoritative for the scope |
+| Human submits a report | Persistable as `CLAIM`; not established fact |
+| AI suggests contractor identity | Candidate/assisted resolution; not automatic confirmation |
+| Payment instruction exists | Do not represent settlement without settlement-supporting evidence |
+| Settlement evidence exists | `PAYMENT_SETTLED` may be created when the evidence supports settlement |
+| Timestamp contains date only | Preserve date precision; do not invent time-of-day |
+| Conflicting source timestamps | Preserve source values and contradiction for later review |
+| Possible person match | Candidate/unresolved; no silent confirmation |
+| Event has no project | Allow unless project is explicitly mandatory for that event type |
+| Event relationship added | Basis/provenance remains available |
+| Mandatory provenance missing | Reject/quarantine or non-downstream state; never silently treat as authoritative |
+| Database commit fails | Rollback; no success result; safe retry |
+| Outbox write fails | Transaction must not leave a durable event that cannot satisfy the required transactional publication contract |
+| `event.created` emitted | Treat as internal eGovTrace message, never as proof of a real-world occurrence |
+| Detection signal later references event | Keep signal as downstream analytical object, not an event assertion |
+| Finding later references event | Keep finding as downstream human/official conclusion, not an event assertion |
 
 ---
 
-## 26. Definition of Done
+## 24. Definition of Done
 
 T004 is complete when:
 
-1. this specification is reviewed and accepted;
-2. the implementation team can derive a bounded GovernmentEvent task without inventing semantics;
-3. the existing domain model is reconciled with this specification;
-4. database operations required for event persistence are explicitly identified;
-5. tests are defined against the acceptance criteria;
-6. no reconciliation, detection, case, API, or UI work is silently included.
+1. this revised specification is accepted;
+2. GovernmentEvent semantics are reconciled with the existing domain implementation;
+3. the observation-state boundary is explicit;
+4. the canonical event-type vocabulary is fixed for V1;
+5. source identity and idempotency semantics are implementable;
+6. temporal precision and revision lineage are implementable;
+7. the transactional boundary is explicit enough for implementation;
+8. automated tests are defined against the acceptance matrix;
+9. the implementation scope remains limited to GovernmentEvent lifecycle behavior.
 
 ---
 
-## 27. Next Engineering Task
+## 25. Next Engineering Task
 
-After approval, the next task is:
+After acceptance, implement:
 
-> **Implement T004 GovernmentEvent lifecycle and persistence behavior against this specification.**
+> **T004 — GovernmentEvent lifecycle and persistence behavior**
 
-That implementation should proceed in the Hands-On Fintech workflow:
+Use the Hands-On Fintech workflow:
 
 ```text
 REQUIREMENT
@@ -984,22 +1009,18 @@ REQUIREMENT
 → ACCEPT
 ```
 
-The implementation must not weaken tests or alter the specification merely to make an edge case pass.
+Do not weaken tests or silently alter semantics to make an edge case pass.
 
 ---
 
-## 28. Traceability to Existing Architecture
+## 26. Traceability
 
-This specification operationalizes the following existing architecture commitments:
+This specification is subordinate to the Master Product Handoff and Master Engineering Prompt.
 
-- implementation order includes `EVENTS` immediately after `DATA`;
-- `GovernmentEvent` is the atomic operational record;
-- source systems remain authoritative;
-- provenance/evidence are structural;
-- historical state is time-aware;
-- deterministic controls precede AI;
-- reconciliation consumes expected control paths plus observed GovernmentEvents;
-- detection produces signals rather than legal conclusions;
-- public projections are separated from the internal assurance graph.
+It is aligned with the existing repository architecture, the existing GovernmentEvent domain model, the source connector/data-boundary architecture, and the versioned API/event contract.
 
-No requirement in this specification overrides the Master Product Handoff or Master Engineering Prompt.
+The API/event contract requires domain events to remain distinct from real-world/source events, preserves idempotency and optimistic concurrency, requires provenance for derived outputs, and explicitly treats missing evidence as a gap rather than a negative fact. fileciteturn122file6L894-L996
+
+The Master Engineering Prompt establishes GovernmentEvent as the normalized temporal spine and requires the observed-event pipeline to retain source/provenance metadata and distinguish uncertainty rather than forcing binary conclusions. fileciteturn122file1L127-L149
+
+The source connector architecture requires source authority to remain external, historical observations to be snapshot-preservable, and identity bridges to remain explicit rather than silently promoting fuzzy matches. fileciteturn123file0L78-L96
