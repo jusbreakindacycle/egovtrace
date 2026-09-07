@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc -b tsconfig.json",
     "typecheck": "tsc -b tsconfig.json --pretty false",
-    "test": "npm run build && node --test tests/domain.test.mjs tests/database.test.mjs tests/government-event-lifecycle.test.mjs tests/expected-control-path.test.mjs tests/expected-control-path-persistence.test.mjs tests/reconciliation.test.mjs tests/reconciliation-application.test.mjs",
+    "test": "npm run build && node --test tests/domain.test.mjs tests/database.test.mjs tests/government-event-lifecycle.test.mjs tests/expected-control-path.test.mjs tests/expected-control-path-persistence.test.mjs tests/reconciliation.test.mjs tests/reconciliation-application.test.mjs tests/detection-domain.test.mjs",
     "lint": "node scripts/lint-placeholder.mjs",
     "dev:api": "node apps/api/src/server.mjs"
   },
